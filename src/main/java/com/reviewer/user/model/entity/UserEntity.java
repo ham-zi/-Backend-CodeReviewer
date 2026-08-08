@@ -1,8 +1,8 @@
-package com.reviewer.auth.model.entity;
+package com.reviewer.user.model.entity;
 
 import java.time.Instant;
 
-import com.reviewer.auth.model.UserRole;
+import com.reviewer.enums.UserRole;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,8 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-
-
 
 @Entity
 @Table(name="users",
@@ -41,7 +39,7 @@ public class UserEntity {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role", nullable = false, length = 20)
-	private UserRole role;
+	private UserRole role = UserRole.USER;
 
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
@@ -52,15 +50,23 @@ public class UserEntity {
 	@Column(name = "last_login_at")
 	private Instant lastLoginAt;
 	
+	@Column(name ="image_url", nullable = false, length = 100)
+	private String imageUrl = "basic_image.jpg";
+	
+
+
 	protected UserEntity() {
 		
 	}
 	
-	public UserEntity(String loginId, String password, String name, UserRole role) {
+	private UserEntity(String loginId, String password, String name) {
 		this.loginId = loginId;
 		this.password = password;
 		this.name = name;
-		this.role = role;
+	}
+	
+	public static UserEntity of(String loginId, String password, String name) {
+		return new UserEntity(loginId, password, name);
 	}
 	
     @PrePersist
@@ -68,6 +74,9 @@ public class UserEntity {
         if (createdAt == null) {
             createdAt = Instant.now();
         }
+    }
+    public String getImageUrl() {
+    	return imageUrl;
     }
 
     public void changePassword(String encodedPassword) {

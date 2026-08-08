@@ -2,7 +2,6 @@ package com.reviewer.auth.model.service;
 
 
 import java.util.Collections;
-import java.util.Optional;
 
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,9 +10,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.reviewer.auth.model.dao.UserRepository;
-import com.reviewer.auth.model.entity.UserEntity;
 import com.reviewer.auth.model.vo.CustomUserDetails;
+import com.reviewer.user.model.entity.UserEntity;
+import com.reviewer.user.model.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

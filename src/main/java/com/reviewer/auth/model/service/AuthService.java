@@ -41,7 +41,7 @@ public class AuthService {
 		Authentication auth = null;
 		try {
 			auth = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(lrd.getUserId(), lrd.getUserPwd()));
+					new UsernamePasswordAuthenticationToken(lrd.getLoginId(), lrd.getPassword()));
 		} catch(AuthenticationException e) {
 			throw new CustomAuthenticationException("아이디 또는 비밀번호가 올바르지 않습니다.");
 		}

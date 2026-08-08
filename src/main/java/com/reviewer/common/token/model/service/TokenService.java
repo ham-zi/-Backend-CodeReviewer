@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.reviewer.auth.model.dao.UserRepository;
 import com.reviewer.auth.model.vo.CustomUserDetails;
 import com.reviewer.common.token.Util.JwtUtil;
 import com.reviewer.common.token.model.dao.TokenRepository;
 import com.reviewer.common.token.model.entity.TokenEntity;
 import com.reviewer.exception.auth.CustomAuthenticationException;
 import com.reviewer.exception.auth.NotFoundTokenException;
+import com.reviewer.user.model.repository.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
