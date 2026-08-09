@@ -20,7 +20,7 @@ public class ProjectMemberService {
 	private final ProjectMemberRepository projectMemberRepository;
 	
 	@Transactional
-	public void createProject(ProjectEntity project) {
+	public void createOwnerMember(ProjectEntity project) {
 		projectMemberRepository.save(ProjectMemberEntity.of(project,
 															project.getCreatedBy(),
 															ProjectMemberRole.OWNER));
