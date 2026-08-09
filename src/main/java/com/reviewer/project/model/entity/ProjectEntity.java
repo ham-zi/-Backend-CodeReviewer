@@ -35,8 +35,10 @@ public class ProjectEntity {
 	private String projectName;
 	@Column(name = "DESCRIPTION", length = 400)	
 	private String description;
-	@Column(name = "REPOSITORY_URL", nullable = false, length = 100)
-	private String repositoryUrl;
+	@Column(name = "GIT_REPO_OWNER", nullable = false, length = 100)
+	private String gitRepoOwner;
+	@Column(name = "GIT_REPO_NAME", nullable = false, length = 100)
+	private String gitRepoName;
 	@Column(name = "DEFAULT_BRANCH", nullable = false, length = 100)
 	private String defaultBranch;
 	@JoinColumn(name = "USER_ID", nullable = false)
@@ -52,22 +54,25 @@ public class ProjectEntity {
 	
 	private ProjectEntity(String projectName,
 			              String description,
-			              String repositoryUrl,
+			              String gitRepoOwner,
+			              String gitRepoName,
 			              String defaultBranch,
 			              UserEntity createdBy) {		
 		this.projectName = projectName;
 		this.description = description;
-		this.repositoryUrl = repositoryUrl;
+		this.gitRepoOwner = gitRepoOwner;
+		this.gitRepoName = gitRepoName;
 		this.defaultBranch = defaultBranch;
 		this.createdBy = createdBy;
 	}
 	
 	public static ProjectEntity of(String projectName,
 			              String description,
-			              String repositoryUrl,
+			              String gitRepoOwner,
+			              String gitRepoName,
 			              String defaultBranch,
 			              UserEntity createdBy) {
-		return new ProjectEntity(projectName, description, repositoryUrl, defaultBranch, createdBy);
+		return new ProjectEntity(projectName, description, gitRepoOwner, gitRepoName, defaultBranch, createdBy);
 	}
 	
 	@PrePersist

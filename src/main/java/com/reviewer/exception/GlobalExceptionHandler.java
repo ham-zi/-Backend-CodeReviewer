@@ -7,10 +7,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.reviewer.api.model.vo.ApiResponse;
 import com.reviewer.exception.auth.CustomAuthenticationException;
 import com.reviewer.exception.auth.NotFoundTokenException;
+import com.reviewer.exception.common.NotFoundException;
 import com.reviewer.exception.user.DuplicateLoginIdException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	
+	//400
+	
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<ApiResponse<Void>> handlerNotFound(NotFoundException e) {
+		return ResponseEntity.badRequest().body(ApiResponse.badRequest(e.getMessage(), null));
+	}
+	
+	
 	
 	//401
 	
@@ -23,7 +33,6 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<Void>> handlerNotFoundToken(NotFoundTokenException e) {
 		return ResponseEntity.badRequest().body(ApiResponse.unAuthorized(e.getMessage(), null));
 	}
-	
 	
 	//409
 	
