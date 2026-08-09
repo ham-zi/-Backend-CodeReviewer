@@ -16,41 +16,41 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name="users",
+@Table(name="USERS",
        uniqueConstraints = {
-    		   @UniqueConstraint(name = "uk_users_login_id", columnNames = "login_id")
+    		   @UniqueConstraint(name = "UK_USERS_LOGIN_ID", columnNames = "LOGIN_ID")
        }
 )
 public class UserEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_id")
+	@Column(name = "USER_ID")
 	private Long id;
 	
-	@Column(name = "login_id", nullable = false, length = 20)
+	@Column(name = "LOGIN_ID", nullable = false, length = 20)
 	private String loginId;
 	
-	@Column(name = "password", nullable = false, length = 100)
+	@Column(name = "PASSWORD", nullable = false, length = 100)
 	private String password;
 	
-	@Column(name = "name", nullable = false, length = 20)
+	@Column(name = "NAME", nullable = false, length = 20)
 	private String name;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(name = "role", nullable = false, length = 20)
+	@Column(name = "ROLE", nullable = false, length = 20)
 	private UserRole role = UserRole.USER;
 
-	@Column(name = "active", nullable = false)
+	@Column(name = "ACTIVE", nullable = false)
 	private boolean active = true;
 	
-	@Column(name = "created_at", nullable = false, updatable = false)
+	@Column(name = "CREATED_AT", nullable = false, updatable = false)
 	private Instant createdAt;
 	
-	@Column(name = "last_login_at")
+	@Column(name = "LAST_LOGIN_AT")
 	private Instant lastLoginAt;
 	
-	@Column(name ="image_url", nullable = false, length = 100)
+	@Column(name ="IMAGE_URL", nullable = false, length = 100)
 	private String imageUrl = "basic_image.jpg";
 	
 
