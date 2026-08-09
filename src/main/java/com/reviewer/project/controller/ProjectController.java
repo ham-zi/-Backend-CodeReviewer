@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +36,15 @@ public class ProjectController {
 	public ResponseEntity<ApiResponse<Void>> saveProject(@Valid @RequestBody ProjectDto project,
 														 @AuthenticationPrincipal CustomUserDetails user) {
 		projectService.saveProject(user, project);
-		return ResponseEntity.ok(ApiResponse.success("프로젝트 저장에 성공했습니다.", null)); 
+		return ResponseEntity.ok(ApiResponse.created("프로젝트 저장에 성공했습니다.", null)); 
+	}
+	
+	@PatchMapping("/{projectId}/rule/{ruleId}")
+	public ResponseEntity<ApiResponse<Void>> updateProjectRule(@PathVariable(name="projectId")Long projectId,
+															   @PathVariable(name="ruleId")Long ruleId,
+															   @AuthenticationPrincipal CustomUserDetails user) {
+		projectService.updateProjectRule(projectId, ruleId, user);
+		return ResponseEntity.ok(ApiResponse.success("프로젝트 규칙 변경에 성공했습니다.", null));
 	}
 	
 	@GetMapping("/{projectId}/git/branches")

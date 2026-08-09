@@ -87,6 +87,10 @@ public class ProjectEntity {
 		updatedAt = Instant.now();
 	}
 	
+	public void updateRule(ProjectRuleEntity rule) {
+		this.projectRule = rule;
+	}
+	
 	public void changeProjectRule(ProjectRuleEntity rule) {
 		if(!rule.getProject().equals(this)) {
 			throw new IllegalArgumentException("다른 프로젝트의 규칙은 적용 할 수 없습니다.");
