@@ -40,10 +40,7 @@ public class ReviewItemEntity {
 
     @Column(name = "TITLE", nullable = false, length = 200)
     private String title;
-
-    @Column(name = "FILE_PATH", length = 500)
-    private String filePath;
-
+    
     @Column(name = "LOCATION", length = 300)
     private String location;
 
@@ -63,7 +60,6 @@ public class ReviewItemEntity {
             ReviewEntity review,
             ReviewResultRole result,
             String title,
-            String filePath,
             String location,
             String evidence,
             String description,
@@ -72,7 +68,6 @@ public class ReviewItemEntity {
         this.review = review;
         this.result = result;
         this.title = title;
-        this.filePath = filePath;
         this.location = location;
         this.evidence = evidence;
         this.description = description;
@@ -83,7 +78,6 @@ public class ReviewItemEntity {
             ReviewEntity review,
             ReviewResultRole result,
             String title,
-            String filePath,
             String location,
             String evidence,
             String description,
@@ -93,7 +87,6 @@ public class ReviewItemEntity {
                 review,
                 result,
                 title,
-                filePath,
                 location,
                 evidence,
                 description,
