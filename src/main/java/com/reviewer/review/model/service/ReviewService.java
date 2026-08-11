@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ReviewService {
 	
 	private final ProjectValidator projectValidator;
-	private final GithubClient githubClient;
 	private final OllamaClient ollamaClient;
 	private final ReviewAsyncService reviewAsyncService;
 	private final ReviewRepository reviewRepository;
@@ -35,13 +34,12 @@ public class ReviewService {
 	public Long quickReview(CustomUserDetails user, ReviewRequest reviewRequest) {
 		ProjectEntity project = projectValidator.existsProject(reviewRequest.projectId());
 		projectValidator.checkProjectMember(reviewRequest.projectId(), user.getUserId());
-		GithubCompareResponse response = githubClient.compare(project.getGitRepoOwner(), project.getGitRepoName(), reviewRequest.baseBranch(), reviewRequest.headBranch());
 		ReviewEntity review = reviewRepository.save(ReviewEntity.of(project,
 				                               ReviewTypeRole.BRANCH, 
 				                               reviewRequest.baseBranch(),
 				                               reviewRequest.headBranch(),
 				                               project.getProjectRule()));
-		reviewAsyncService.process(review.getReviewId(), response);
+		reviewAsyncService.process(review.getReviewId(), reviewRequest);
 		return review.getReviewId();
 	}
 	
@@ -61,7 +59,7 @@ public class ReviewService {
 	}
 	
 	
-	public String testOllama(ProjectEntity project, GithubCompareResponse res) {
+	public String test(ProjectEntity project, GithubCompareResponse res) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("##리뷰 대상 코드##");
 		sb.append("""
