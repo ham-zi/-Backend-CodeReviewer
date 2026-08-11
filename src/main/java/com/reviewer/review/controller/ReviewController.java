@@ -24,9 +24,8 @@ public class ReviewController {
 	private final ReviewService reviewService;
 	
 	@PostMapping("/quick")
-	public ResponseEntity<ApiResponse<String>> quickReview(@AuthenticationPrincipal CustomUserDetails user,
+	public ResponseEntity<ApiResponse<Long>> quickReview(@AuthenticationPrincipal CustomUserDetails user,
 														 @RequestBody ReviewRequest reviewRequest) {
-		String response = reviewService.quickReview(user, reviewRequest);
-		return ResponseEntity.ok(ApiResponse.success("빠른 리뷰 성공했습니다.", response));
+		return ResponseEntity.ok(ApiResponse.success("코드 리뷰가 시작되었습니다.", reviewService.quickReview(user, reviewRequest)));
 	}
 }

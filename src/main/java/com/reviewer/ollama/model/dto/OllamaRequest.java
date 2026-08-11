@@ -1,5 +1,7 @@
 package com.reviewer.ollama.model.dto;
 
-public record OllamaRequest(String model, String system, String prompt, boolean stream) {
+import java.util.Map;
+
+public record OllamaRequest(String model, String system, String prompt, boolean stream, String format , Map<String, Object> options) {
 
 }
