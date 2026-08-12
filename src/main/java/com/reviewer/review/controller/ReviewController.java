@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.reviewer.api.model.vo.ApiResponse;
 import com.reviewer.auth.model.vo.CustomUserDetails;
-import com.reviewer.review.model.dto.ReviewRequest;
+import com.reviewer.review.model.dto.BranchReviewRequest;
+import com.reviewer.review.model.dto.QuickReviewRequest;
 import com.reviewer.review.model.service.ReviewService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +27,13 @@ public class ReviewController {
 	
 	@PostMapping("/quick")
 	public ResponseEntity<ApiResponse<Long>> quickReview(@AuthenticationPrincipal CustomUserDetails user,
-														 @RequestBody ReviewRequest reviewRequest) {
+			                                             @Valid @RequestBody QuickReviewRequest reviewRequest){
 		return ResponseEntity.ok(ApiResponse.success("코드 리뷰가 시작되었습니다.", reviewService.quickReview(user, reviewRequest)));
+	}
+	
+	@PostMapping("/branch")
+	public ResponseEntity<ApiResponse<Long>> branchReview(@AuthenticationPrincipal CustomUserDetails user,
+														 @Valid @RequestBody BranchReviewRequest reviewRequest) {
+		return ResponseEntity.ok(ApiResponse.success("코드 리뷰가 시작되었습니다.", reviewService.branchReview(user, reviewRequest)));
 	}
 }

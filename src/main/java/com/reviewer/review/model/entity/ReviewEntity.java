@@ -36,10 +36,6 @@ public class ReviewEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "REVIEW_TYPE",nullable = false, length = 20)
 	private ReviewTypeRole reviewType;
-	@Column(name = "BASE_BRANCH", nullable = false, length = 100)
-	private String baseBranch;
-	@Column(name = "HEAD_BRANCH", nullable = false, length = 100)	
-	private String headBranch;
 	@JoinColumn(name = "RULE_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private ProjectRuleEntity projectRule;
@@ -53,26 +49,18 @@ public class ReviewEntity {
 	
 	private ReviewEntity(ProjectEntity project,
 			             ReviewTypeRole reviewType,
-			             String baseBranch,
-			             String headBranch,
 			             ProjectRuleEntity projectRule) {
 		this.project = project;
 		this.reviewType = reviewType;
-		this.baseBranch = baseBranch;
-		this.headBranch = headBranch;
 		this.projectRule = projectRule;
 		this.status = ReviewStatusRole.PENDING;
 	}
 	
 	public static ReviewEntity of(ProjectEntity project,
 					              ReviewTypeRole reviewType,
-					              String baseBranch,
-					              String headBranch,
 					              ProjectRuleEntity projectRule) {
 		return new ReviewEntity(project,
 								reviewType,
-								baseBranch,
-								headBranch,
 								projectRule);
 	}
 	

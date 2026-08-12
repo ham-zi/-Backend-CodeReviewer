@@ -29,11 +29,13 @@ public class ReviewTransactionService {
         ReviewEntity review = reviewRepository.findById(reviewId)
                 .orElseThrow(() ->
                         new NotFoundException("존재하지 않는 리뷰입니다."));
-
+        
         review.start();
 
         return new ReviewProcessData(
-                review.getProjectRule().getContent()
+                review.getProjectRule().getContent(),
+                review.getProject().getGitRepoOwner(),
+                review.getProject().getGitRepoName()
         );
     }
 
