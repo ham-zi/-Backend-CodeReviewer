@@ -2,18 +2,21 @@ package com.reviewer.review.model.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.reviewer.auth.model.vo.CustomUserDetails;
 import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.github.model.dto.GithubCompareResponse;
 import com.reviewer.github.model.dto.GithubFileResponse;
-import com.reviewer.github.model.service.GithubClient;
 import com.reviewer.ollama.client.OllamaClient;
 import com.reviewer.project.model.entity.ProjectEntity;
-import com.reviewer.project.projectRule.model.repository.ProjectRuleRepository;
 import com.reviewer.project.validator.ProjectValidator;
+import com.reviewer.review.model.dao.BranchSourceRepository;
 import com.reviewer.review.model.dao.ReviewRepository;
-import com.reviewer.review.model.dto.ReviewRequest;
+import com.reviewer.review.model.dto.BranchReviewRequest;
+import com.reviewer.review.model.dto.QuickReviewRequest;
+import com.reviewer.review.model.entity.BranchSourceEntity;
 import com.reviewer.review.model.entity.ReviewEntity;
 
 import lombok.RequiredArgsConstructor;
@@ -29,21 +32,37 @@ public class ReviewService {
 	private final OllamaClient ollamaClient;
 	private final ReviewAsyncService reviewAsyncService;
 	private final ReviewRepository reviewRepository;
+	private final BranchSourceRepository branchSourceRepository;
+	
+	public Long quickReview(CustomUserDetails user, QuickReviewRequest reviewRequest) {
+		ProjectEntity project = projectValidator.existsProject(reviewRequest.projectId());
+		projectValidator.checkProjectMember(reviewRequest.projectId(), user.getUserId());
+		//ReviewEntity review = reviewRepository
+		return (long)1;
+	}
 	
 	@Transactional
-	public Long quickReview(CustomUserDetails user, ReviewRequest reviewRequest) {
+	public Long branchReview(CustomUserDetails user, BranchReviewRequest reviewRequest) {
 		ProjectEntity project = projectValidator.existsProject(reviewRequest.projectId());
 		projectValidator.checkProjectMember(reviewRequest.projectId(), user.getUserId());
 		ReviewEntity review = reviewRepository.save(ReviewEntity.of(project,
-				                               ReviewTypeRole.BRANCH, 
-				                               reviewRequest.baseBranch(),
-				                               reviewRequest.headBranch(),
+				                               ReviewTypeRole.BRANCH,
 				                               project.getProjectRule()));
+		branchSourceRepository.save(BranchSourceEntity.of(review, reviewRequest.baseBranch(), reviewRequest.headBranch()));
 		reviewAsyncService.process(review.getReviewId(), reviewRequest);
-		return review.getReviewId();
-	}
+		TransactionSynchronizationManager.registerSynchronization( new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				reviewAsyncService.process(review.getReviewId(), reviewRequest);
+				}
+			}
+		);
+			return review.getReviewId();
+		}
 	
-	public String branchReview(ReviewEntity review, GithubCompareResponse res) {
+	
+	
+	public String branchReviewww(ReviewEntity review, GithubCompareResponse res) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("##리뷰 대상 코드##");
 		for (GithubFileResponse file : res.files()) {
@@ -53,6 +72,7 @@ public class ReviewService {
 		}
 		sb.append("##팀 규칙##");
 		sb.append(review.getProjectRule().getContent());
+		log.info("sb는 멀쩡하게 되었는가? {}", sb.toString());
 	    return ollamaClient.generate(
 	        		sb.toString()
 	    );
