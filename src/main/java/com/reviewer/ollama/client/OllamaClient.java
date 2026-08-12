@@ -8,6 +8,7 @@ import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import com.reviewer.ollama.model.dto.OllamaOptions;
 import com.reviewer.ollama.model.dto.OllamaRequest;
 import com.reviewer.ollama.model.dto.OllamaResponse;
 
@@ -17,11 +18,26 @@ import reactor.netty.http.client.HttpClient;
 public class OllamaClient {
 
 	private final RestClient restClient;
+	private final String baseUrl;
 	private final String model;
+	private final boolean stream;
+	private final String format;
+	private final Integer numCtx;
+	private final Double temperature;
 	
 	public OllamaClient(
-		@Value("${app.ollama.base-url}") String baseUrl,
-		@Value("${app.ollama.model}") String model) {
+		@Value("${app.ollama.base-url}") 
+		String baseUrl,
+		@Value("${app.ollama.model}") 
+		String model,
+		@Value("${app.ollama.stream}")
+		boolean stream,
+		@Value("${app.ollama.format}")
+		String format,
+		@Value("${app.ollama.num-ctx}")
+		Integer numCtx,
+		@Value("${app.ollama.temperature}")
+		Double temperature) {
 		
 		HttpClient httpClient = HttpClient.create()
 				.responseTimeout(Duration.ofMinutes(5));
@@ -33,7 +49,11 @@ public class OllamaClient {
 				                    .requestFactory(requestFactory)
 				                    .build();
 		this.model = model;
-		
+		this.baseUrl = baseUrl;
+		this.stream = stream;
+		this.format = format;
+		this.numCtx = numCtx;
+		this.temperature = temperature;
 	}
 	
 	public String generate(String prompt) {
@@ -94,7 +114,7 @@ public class OllamaClient {
 								  ]
 								}
 							  """;
-		OllamaRequest request = new OllamaRequest(model, systemPrompt ,prompt, false, "json", Map.of("temperature", 0.0));
+		OllamaRequest request = new OllamaRequest(model, systemPrompt ,prompt, stream, format, new OllamaOptions(numCtx, temperature));
 		
 		OllamaResponse response = restClient.post().uri("/api/generate")
 												   .body(request)
