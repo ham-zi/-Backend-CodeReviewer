@@ -65,7 +65,6 @@ public class ReviewService {
         JsonNode json =
                 jsonMapper.readTree(rawResponse);
         JsonNode reviews = json.get("reviews");
-        log.info("{}@@@@@@@",reviews);
         for (JsonNode r : reviews) {
 
             ReviewItemEntity item =
@@ -103,7 +102,6 @@ public class ReviewService {
 				                               model
 				                               ));
 		branchSourceRepository.save(BranchSourceEntity.of(review, reviewRequest.baseBranch(), reviewRequest.headBranch()));
-		reviewAsyncService.process(review.getReviewId(), reviewRequest);
 		TransactionSynchronizationManager.registerSynchronization( new TransactionSynchronization() {
 			@Override
 			public void afterCommit() {

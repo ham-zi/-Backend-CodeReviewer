@@ -12,11 +12,15 @@ import com.reviewer.exception.common.NotFoundException;
 import com.reviewer.ollama.model.dto.OllamaOptions;
 import com.reviewer.ollama.model.dto.OllamaRequest;
 import com.reviewer.ollama.model.dto.OllamaResponse;
+import com.reviewer.system.model.Entity.SystemSettingEntity;
 import com.reviewer.system.model.dao.SystemSettingRepository;
+import com.reviewer.system.model.service.SystemPromptService;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.netty.http.client.HttpClient;
 
 @Component
+@Slf4j
 public class OllamaClient {
 
 	private final RestClient restClient;
@@ -26,7 +30,7 @@ public class OllamaClient {
 	private final String format;
 	private final Integer numCtx;
 	private final Double temperature;
-	private final SystemSettingRepository systemSettingRepository;
+	private final SystemPromptService systemPromptService;
 	
 	public OllamaClient(
 		@Value("${app.ollama.base-url}") 
@@ -41,7 +45,7 @@ public class OllamaClient {
 		Integer numCtx,
 		@Value("${app.ollama.temperature}")
 		Double temperature,
-		SystemSettingRepository systemSettingRepository) {
+		SystemPromptService systemPromptService) {
 		
 		HttpClient httpClient = HttpClient.create()
 				.responseTimeout(Duration.ofMinutes(5));
@@ -58,14 +62,11 @@ public class OllamaClient {
 		this.format = format;
 		this.numCtx = numCtx;
 		this.temperature = temperature;
-		this.systemSettingRepository = systemSettingRepository;
+		this.systemPromptService = systemPromptService;
 	}
 	
 	public String quickReview(String prompt) {
-		String systemPrompt = systemSettingRepository.findById(ReviewTypeRole.QUICK)
-													 .orElseThrow(()-> new NotFoundException("존재하지 않는 시스템 프롬프트입니다."))
-													 .getSystemPrompt()
-													 .getPrompt();
+		String systemPrompt = systemPromptService.findCurrentPrompt(ReviewTypeRole.QUICK);
 		OllamaRequest request = new OllamaRequest(model, systemPrompt ,prompt, stream, format, new OllamaOptions(numCtx, temperature));
 		
 		OllamaResponse response = restClient.post().uri("/api/generate")
@@ -80,10 +81,7 @@ public class OllamaClient {
 		return response.response();
 	}
 	public String branchReview(String prompt) {
-		String systemPrompt = systemSettingRepository.findById(ReviewTypeRole.BRANCH)
-				.orElseThrow(()-> new NotFoundException("존재하지 않는 시스템 프롬프트입니다."))
-				.getSystemPrompt()
-				.getPrompt();
+		String systemPrompt = systemPromptService.findCurrentPrompt(ReviewTypeRole.BRANCH);
 		OllamaRequest request = new OllamaRequest(model, systemPrompt ,prompt, stream, format, new OllamaOptions(numCtx, temperature));
 		
 		OllamaResponse response = restClient.post().uri("/api/generate")

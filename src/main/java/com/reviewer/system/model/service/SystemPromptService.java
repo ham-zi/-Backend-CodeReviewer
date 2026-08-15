@@ -33,6 +33,19 @@ public class SystemPromptService {
 	private final SystemPromptRepository systemPromptRepository;
 	private final SystemSettingRepository systemSettingRepository;
 	
+	public String findCurrentPrompt(ReviewTypeRole type) {
+
+	    SystemSettingEntity setting =
+	            systemSettingRepository.findById(type)
+	                    .orElseThrow(() ->
+	                            new NotFoundException(
+	                                    "존재하지 않는 시스템 프롬프트 설정입니다."
+	                            )
+	                    );
+
+	    return setting.getSystemPrompt().getPrompt();
+	}
+	
 	@Transactional
 	public void save(SystemPromptDto prompt) {
 		ValidateVersion(prompt.getType(), prompt.getVersion());
@@ -71,6 +84,5 @@ public class SystemPromptService {
 		SystemSettingEntity setting = systemSettingRepository.findById(settings.type()).orElseThrow(()-> new NotFoundException("존재하지 않는 리뷰타입입니다."));
 		setting.changePrompt(systemPromptRepository.findById(settings.systemPromptId()).orElseThrow(()-> new NotFoundException("존재하지 않는 시스템프롬프트입니다.")));
 	}
-	
-	
+
 }

@@ -63,7 +63,7 @@ public class ReviewAsyncService {
             // 여기는 트랜잭션 없음
             // Ollama가 오래 걸려도 DB 트랜잭션을 잡고 있지 않음
             String rawResponse =
-                    ollamaClient.generate(sb.toString());
+                    ollamaClient.branchReview(sb.toString());
             log.info("raw값넘기기 전{}",rawResponse);
             System.out.println(rawResponse);
             JsonNode json =
