@@ -52,13 +52,13 @@ public class ReviewTransactionService {
                         new NotFoundException("존재하지 않는 리뷰입니다."));
 
         JsonNode reviews = json.get("reviews");
+        log.info("@@@@@{}",reviews);
 
         for (JsonNode r : reviews) {
-
             ReviewItemEntity item =
                     ReviewItemEntity.of(
                             review,
-                            ReviewResultRole.VIOLATION,
+                            ReviewResultRole.valueOf(r.get("status").asText()),
                             r.get("title").asText(),
                             r.get("location").asText(),
                             r.get("evidence").asText(),

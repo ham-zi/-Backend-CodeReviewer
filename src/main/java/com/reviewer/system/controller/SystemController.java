@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import com.reviewer.api.model.vo.ApiResponse;
 import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.system.model.dto.SystemPromptDto;
 import com.reviewer.system.model.dto.SystemPromptResponse;
+import com.reviewer.system.model.dto.SystemSettingRequest;
 import com.reviewer.system.model.service.SystemPromptService;
 
 import jakarta.validation.Valid;
@@ -52,6 +54,12 @@ public class SystemController {
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable(name="id")Long id) {
 		systemPromptService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("시스템 프롬프트 삭제에 성공했습니다.", null));
+	}
+	
+	@PatchMapping("/setting")
+	public ResponseEntity<ApiResponse<Void>> patchSetting(@RequestBody SystemSettingRequest settings) {
+		systemPromptService.patchSetting(settings);
+		return ResponseEntity.ok(ApiResponse.success(settings.type()+"의 시스템프롬프트를 변경했습니다",null));
 	}
 	
 }
