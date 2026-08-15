@@ -29,7 +29,7 @@ public class ReviewController {
 	public ResponseEntity<ApiResponse<Void>> quickReview(@AuthenticationPrincipal CustomUserDetails user,
 			                                             @Valid @RequestBody QuickReviewRequest reviewRequest){
 		reviewService.quickReview(user, reviewRequest);
-		return ResponseEntity.ok(ApiResponse.success("코드 리뷰가 시작되었습니다.", null));
+		return ResponseEntity.ok(ApiResponse.success("코드 리뷰가 완료되었습니다.", null));
 	}
 	
 	@PostMapping("/branch")
