@@ -6,6 +6,7 @@ import com.reviewer.enums.ReviewStatusRole;
 import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.project.model.entity.ProjectEntity;
 import com.reviewer.project.projectRule.model.entity.ProjectRuleEntity;
+import com.reviewer.system.model.Entity.SystemPromptEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,6 +43,11 @@ public class ReviewEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "STATUS", nullable = false, length = 20)
 	private ReviewStatusRole status;
+	@JoinColumn(name = "SYSTEM_PROMPT_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private SystemPromptEntity systemPrompt;
+	@Column(name = "AI_MODEL", nullable = false, length = 100)
+	private String aiModel;
 	@Column(name = "RAW_RESPONSE", columnDefinition = "TEXT")
 	private String rawResponse;
 	@Column(name = "CREATED_AT", nullable = false, updatable = false)
@@ -49,19 +55,27 @@ public class ReviewEntity {
 	
 	private ReviewEntity(ProjectEntity project,
 			             ReviewTypeRole reviewType,
-			             ProjectRuleEntity projectRule) {
+			             ProjectRuleEntity projectRule,
+			             SystemPromptEntity systemPrompt,
+			             String aiModel) {
 		this.project = project;
 		this.reviewType = reviewType;
 		this.projectRule = projectRule;
 		this.status = ReviewStatusRole.PENDING;
+		this.systemPrompt = systemPrompt;
+		this.aiModel = aiModel;
 	}
 	
 	public static ReviewEntity of(ProjectEntity project,
 					              ReviewTypeRole reviewType,
-					              ProjectRuleEntity projectRule) {
+					              ProjectRuleEntity projectRule,
+					              SystemPromptEntity systemPrompt,
+					              String aiModel) {
 		return new ReviewEntity(project,
 								reviewType,
-								projectRule);
+								projectRule,
+								systemPrompt,
+								aiModel);
 	}
 	
 	@PrePersist
