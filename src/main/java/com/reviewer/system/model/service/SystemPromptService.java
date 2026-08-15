@@ -1,14 +1,22 @@
 package com.reviewer.system.model.service;
 
+
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.reviewer.auth.model.vo.CustomUserDetails;
 import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.exception.common.DuplicateException;
+import com.reviewer.exception.common.NotFoundException;
 import com.reviewer.system.model.Entity.SystemPromptEntity;
 import com.reviewer.system.model.dao.SystemPromptRepository;
 import com.reviewer.system.model.dto.SystemPromptDto;
+import com.reviewer.system.model.dto.SystemPromptResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +30,7 @@ public class SystemPromptService {
 	private final SystemPromptRepository systemPromptRepository;
 	
 	@Transactional
-	public void save(CustomUserDetails user, SystemPromptDto prompt) {
+	public void save(SystemPromptDto prompt) {
 		ValidateVersion(prompt.getType(), prompt.getVersion());
 		systemPromptRepository.save(SystemPromptEntity.of(prompt.getPrompt(),
 														  prompt.getVersion(),
@@ -30,8 +38,22 @@ public class SystemPromptService {
 														  prompt.getType()));
 	}
 	
-	public List<SytemPromptEntity> findAll(){
-		
+	public Page<SystemPromptResponse> findAll(int page, ReviewTypeRole type){
+		Pageable pageable = (Pageable) PageRequest.of(page - 1,
+													  10,
+													  Sort.by(Sort.Direction.DESC, "createdAt"));
+		Page<SystemPromptEntity> prompts = systemPromptRepository.findAllByType(type, pageable);
+		return prompts.map(SystemPromptResponse::from);
+	}
+	
+	public SystemPromptResponse findById(Long systemPromptId) {
+		SystemPromptEntity prompt = systemPromptRepository.findById(systemPromptId).orElseThrow(() ->new NotFoundException("존재하지 않는 시스템프롬프트입니다."));
+		return SystemPromptResponse.from(prompt);
+	}
+	
+	@Transactional
+	public void delete(Long systemPromptId) {
+		systemPromptRepository.deleteById(systemPromptId);
 	}
 	
 	private void ValidateVersion(ReviewTypeRole type, String version) {

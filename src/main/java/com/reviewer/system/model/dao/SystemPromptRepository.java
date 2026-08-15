@@ -1,5 +1,9 @@
 package com.reviewer.system.model.dao;
 
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.reviewer.enums.ReviewTypeRole;
@@ -10,4 +14,8 @@ public interface SystemPromptRepository extends JpaRepository<SystemPromptEntity
             ReviewTypeRole type,
             String version
         );
+    Page<SystemPromptEntity> findAllByType(
+            ReviewTypeRole type,
+            Pageable pageable
+    );
 }
