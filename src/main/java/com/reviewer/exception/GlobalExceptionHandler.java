@@ -8,6 +8,7 @@ import com.reviewer.api.model.vo.ApiResponse;
 import com.reviewer.exception.auth.CustomAuthenticationException;
 import com.reviewer.exception.auth.NotFoundTokenException;
 import com.reviewer.exception.common.AccessDeniedException;
+import com.reviewer.exception.common.DuplicateException;
 import com.reviewer.exception.common.NotFoundException;
 import com.reviewer.exception.user.DuplicateLoginIdException;
 
@@ -48,5 +49,12 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<Void>> handlerDuplicateLoginId(DuplicateLoginIdException e) {
 		return ResponseEntity.badRequest().body(ApiResponse.conplict(e.getMessage(), null));
 	}
+
+	@ExceptionHandler(DuplicateException.class)
+	public ResponseEntity<ApiResponse<Void>> handlerDuplicate(DuplicateException e) {
+		return ResponseEntity.badRequest().body(ApiResponse.conplict(e.getMessage(), null));
+	}
+	
+
 
 }

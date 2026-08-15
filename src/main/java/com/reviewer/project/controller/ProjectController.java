@@ -46,6 +46,7 @@ public class ProjectController {
 		projectService.updateProjectRule(projectId, ruleId, user);
 		return ResponseEntity.ok(ApiResponse.success("프로젝트 규칙 변경에 성공했습니다.", null));
 	}
+
 	
 	@GetMapping("/{projectId}/git/branches")
 	public ResponseEntity<ApiResponse<List<BranchResponse>>> getBranches(@PathVariable(name = "projectId")Long projectId,

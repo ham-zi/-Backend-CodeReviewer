@@ -28,12 +28,13 @@ public class ProjectValidator {
 		return projectRepository.findById(projectId).orElseThrow(()-> new NotFoundException("존재하지 않는 프로젝트입니다."));
 	}
 	
-	public void checkProjectMember(Long projectId, Long userId) {
+	public ProjectEntity checkProjectMember(Long projectId, Long userId) {
 		ProjectEntity project = existsProject(projectId);
 		UserEntity user = userRepository.findById(userId).orElseThrow(()-> new NotFoundException("존재하지 않는 아이디입니다."));
 		if(!projectMemberRepository.existsByProjectAndUser(project, user)) {
 			throw new NotFoundException("존재하지 않는 멤버입니다.");
 		}
+		return project;
 	}
 	
 	public void checkProjectOwner(Long projectId, Long userId) {
