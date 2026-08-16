@@ -13,8 +13,10 @@ import com.reviewer.exception.common.NotFoundException;
 import com.reviewer.github.model.dto.GithubCompareResponse;
 import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.ollama.client.OllamaClient;
+import com.reviewer.ollama.model.dto.OllamaResponse;
 import com.reviewer.project.model.entity.ProjectEntity;
 import com.reviewer.project.validator.ProjectValidator;
+import com.reviewer.review.metrics.model.service.MetricsService;
 import com.reviewer.review.model.dao.BranchSourceRepository;
 import com.reviewer.review.model.dao.QuickSourceRepository;
 import com.reviewer.review.model.dao.ReviewItemRepository;
@@ -47,6 +49,7 @@ public class ReviewService {
 	private final ReviewItemRepository reviewItemRepository;
     private final JsonMapper jsonMapper;
     private final SystemSettingRepository systemSettingRepository;
+    private final MetricsService metricsService;
     @Value("${app.ollama.model}")
     private String model;
 	
@@ -60,11 +63,21 @@ public class ReviewService {
 													systemSettingRepository.findById(ReviewTypeRole.QUICK).orElseThrow(()-> new NotFoundException("존재하지 않는 리뷰타입입니다.")).getSystemPrompt(),
 													model));
 		quickSourceRepository.save(QuickSourceEntity.of(review, reviewRequest.code()));
-		String rawResponse = quickReview(review, reviewRequest.code());
-		review.complete(rawResponse);
+		OllamaResponse ollamaResponse = quickReview(review, reviewRequest.code());
+		review.complete(ollamaResponse.response());
+		
         JsonNode json =
-                jsonMapper.readTree(rawResponse);
+                jsonMapper.readTree(ollamaResponse.response());
+        
         JsonNode reviews = json.get("reviews");
+        if (reviews == null || !reviews.isArray()) {
+            throw new IllegalStateException(
+                    "Ollama 응답에 reviews 배열이 존재하지 않습니다."
+            );
+        }
+        
+        
+        metricsService.saveMetrics(review.getReviewId(), ollamaResponse);
         for (JsonNode r : reviews) {
 
             ReviewItemEntity item =
@@ -82,7 +95,7 @@ public class ReviewService {
         }
 	}
 	
-	private String quickReview(ReviewEntity review, String code) {
+	private OllamaResponse quickReview(ReviewEntity review, String code) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("##리뷰 대상 코드##");
 		sb.append(code);
@@ -111,24 +124,5 @@ public class ReviewService {
 		);
 			return review.getReviewId();
 		}
-	
-	
-	
-	public String branchReviewww(ReviewEntity review, GithubCompareResponse res) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("##리뷰 대상 코드##");
-		for (GithubFileResponse file : res.files()) {
-		    sb.append("파일: ").append(file.filename()).append("\n");
-		    sb.append("변경사항:\n");
-		    sb.append(file.patch()).append("\n\n");
-		}
-		sb.append("##팀 규칙##");
-		sb.append(review.getProjectRule().getContent());
-		log.info("sb는 멀쩡하게 되었는가? {}", sb.toString());
-	    return ollamaClient.branchReview(
-	        		sb.toString()
-	    );
-	}
-
 	
 }

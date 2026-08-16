@@ -8,6 +8,8 @@ import com.reviewer.github.model.dto.GithubCompareResponse;
 import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.github.model.service.GithubClient;
 import com.reviewer.ollama.client.OllamaClient;
+import com.reviewer.ollama.model.dto.OllamaResponse;
+import com.reviewer.review.metrics.model.service.MetricsService;
 import com.reviewer.review.model.dto.BranchReviewRequest;
 import com.reviewer.review.model.dto.ReviewProcessData;
 
@@ -25,6 +27,7 @@ public class ReviewAsyncService {
     private final JsonMapper jsonMapper;
     private final ReviewTransactionService reviewTransactionService;
     private final GithubClient githubClient;
+    private final MetricsService metricsService;
     
     @Async
     public void process(Long reviewId, BranchReviewRequest reviewRequest) {
@@ -33,7 +36,6 @@ public class ReviewAsyncService {
         try {
             // 짧은 트랜잭션
             // PROCESSING 변경 + LAZY 데이터 추출
-        	log.info("{}@@@@@@@@@도착하는가?", reviewId);
             ReviewProcessData data =
                     reviewTransactionService.start(reviewId);
 
@@ -62,17 +64,17 @@ public class ReviewAsyncService {
             log.info("prompt end = {}", sb.toString().substring(Math.max(0, sb.toString().length() - 1500)));
             // 여기는 트랜잭션 없음
             // Ollama가 오래 걸려도 DB 트랜잭션을 잡고 있지 않음
-            String rawResponse =
+            OllamaResponse ollamaResponse =
                     ollamaClient.branchReview(sb.toString());
-            log.info("raw값넘기기 전{}",rawResponse);
-            System.out.println(rawResponse);
+            log.info("raw값넘기기 전{}",ollamaResponse.response());
             JsonNode json =
-                    jsonMapper.readTree(rawResponse);
-            // 짧은 트랜잭션
-            // ReviewItem 저장 + COMPLETED 변경
+                    jsonMapper.readTree(ollamaResponse.response());
+
+            metricsService.saveMetrics(reviewId, ollamaResponse);
+
             reviewTransactionService.complete(
                     reviewId,
-                    rawResponse,
+                    ollamaResponse.response(),
                     json
             );
 
