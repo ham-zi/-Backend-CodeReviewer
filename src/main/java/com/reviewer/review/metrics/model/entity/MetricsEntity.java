@@ -44,6 +44,14 @@ public class MetricsEntity {
     private Integer evalCount;
 
     /**
+     * 모델 로딩 시간
+     * Ollama: load_duration
+     * 단위: nanoseconds
+     */
+    @Column(name = "load_duration")
+    private Long loadDuration;
+
+    /**
      * 입력 프롬프트 처리 시간
      * Ollama: prompt_eval_duration
      * 단위: nanoseconds
@@ -72,15 +80,18 @@ public class MetricsEntity {
             ReviewEntity review,
             Integer promptEvalCount,
             Integer evalCount,
+            Long loadDuration,
             Long promptEvalDuration,
             Long evalDuration,
             Long totalDuration
     ) {
+
         MetricsEntity metrics = new MetricsEntity();
 
         metrics.review = review;
         metrics.promptEvalCount = promptEvalCount;
         metrics.evalCount = evalCount;
+        metrics.loadDuration = loadDuration;
         metrics.promptEvalDuration = promptEvalDuration;
         metrics.evalDuration = evalDuration;
         metrics.totalDuration = totalDuration;

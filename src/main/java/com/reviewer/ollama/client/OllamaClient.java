@@ -65,7 +65,7 @@ public class OllamaClient {
 		this.systemPromptService = systemPromptService;
 	}
 	
-	public String quickReview(String prompt) {
+	public OllamaResponse quickReview(String prompt) {
 		String systemPrompt = systemPromptService.findCurrentPrompt(ReviewTypeRole.QUICK);
 		OllamaRequest request = new OllamaRequest(model, systemPrompt ,prompt, stream, format, new OllamaOptions(numCtx, temperature));
 		
@@ -78,9 +78,9 @@ public class OllamaClient {
 			throw new IllegalStateException("Ollama 응답이 존재하지 않습니다.");
 		}
 		
-		return response.response();
+		return response;
 	}
-	public String branchReview(String prompt) {
+	public OllamaResponse branchReview(String prompt) {
 		String systemPrompt = systemPromptService.findCurrentPrompt(ReviewTypeRole.BRANCH);
 		OllamaRequest request = new OllamaRequest(model, systemPrompt ,prompt, stream, format, new OllamaOptions(numCtx, temperature));
 		
@@ -93,6 +93,6 @@ public class OllamaClient {
 			throw new IllegalStateException("Ollama 응답이 존재하지 않습니다.");
 		}
 		
-		return response.response();
+		return response;
 	}
 }

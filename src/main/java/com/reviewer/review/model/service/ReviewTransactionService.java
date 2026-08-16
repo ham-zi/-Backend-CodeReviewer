@@ -52,6 +52,11 @@ public class ReviewTransactionService {
                         new NotFoundException("존재하지 않는 리뷰입니다."));
 
         JsonNode reviews = json.get("reviews");
+        if (reviews == null || !reviews.isArray()) {
+            throw new IllegalStateException(
+                    "Ollama 응답에 reviews 배열이 존재하지 않습니다."
+            );
+        }
         log.info("@@@@@{}",reviews);
 
         for (JsonNode r : reviews) {

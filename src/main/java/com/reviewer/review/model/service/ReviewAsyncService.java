@@ -8,6 +8,7 @@ import com.reviewer.github.model.dto.GithubCompareResponse;
 import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.github.model.service.GithubClient;
 import com.reviewer.ollama.client.OllamaClient;
+import com.reviewer.ollama.model.dto.OllamaResponse;
 import com.reviewer.review.metrics.model.service.MetricsService;
 import com.reviewer.review.model.dto.BranchReviewRequest;
 import com.reviewer.review.model.dto.ReviewProcessData;
@@ -63,18 +64,17 @@ public class ReviewAsyncService {
             log.info("prompt end = {}", sb.toString().substring(Math.max(0, sb.toString().length() - 1500)));
             // 여기는 트랜잭션 없음
             // Ollama가 오래 걸려도 DB 트랜잭션을 잡고 있지 않음
-            String rawResponse =
+            OllamaResponse ollamaResponse =
                     ollamaClient.branchReview(sb.toString());
-            log.info("raw값넘기기 전{}",rawResponse);
-            System.out.println(rawResponse);
+            log.info("raw값넘기기 전{}",ollamaResponse.response());
             JsonNode json =
-                    jsonMapper.readTree(rawResponse);
+                    jsonMapper.readTree(ollamaResponse.response());
 
-            metricsService.saveMetrics(reviewId, json);
+            metricsService.saveMetrics(reviewId, ollamaResponse);
 
             reviewTransactionService.complete(
                     reviewId,
-                    rawResponse,
+                    ollamaResponse.response(),
                     json
             );
 

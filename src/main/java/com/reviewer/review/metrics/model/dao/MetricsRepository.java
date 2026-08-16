@@ -6,5 +6,4 @@ import com.reviewer.review.metrics.model.entity.MetricsEntity;
 
 
 public interface MetricsRepository extends JpaRepository<MetricsEntity, Long> {
-
 }
