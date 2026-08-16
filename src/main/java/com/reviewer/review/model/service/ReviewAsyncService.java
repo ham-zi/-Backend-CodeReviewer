@@ -8,6 +8,7 @@ import com.reviewer.github.model.dto.GithubCompareResponse;
 import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.github.model.service.GithubClient;
 import com.reviewer.ollama.client.OllamaClient;
+import com.reviewer.review.metrics.model.service.MetricsService;
 import com.reviewer.review.model.dto.BranchReviewRequest;
 import com.reviewer.review.model.dto.ReviewProcessData;
 
@@ -25,6 +26,7 @@ public class ReviewAsyncService {
     private final JsonMapper jsonMapper;
     private final ReviewTransactionService reviewTransactionService;
     private final GithubClient githubClient;
+    private final MetricsService metricsService;
     
     @Async
     public void process(Long reviewId, BranchReviewRequest reviewRequest) {
@@ -33,7 +35,6 @@ public class ReviewAsyncService {
         try {
             // 짧은 트랜잭션
             // PROCESSING 변경 + LAZY 데이터 추출
-        	log.info("{}@@@@@@@@@도착하는가?", reviewId);
             ReviewProcessData data =
                     reviewTransactionService.start(reviewId);
 
@@ -68,8 +69,9 @@ public class ReviewAsyncService {
             System.out.println(rawResponse);
             JsonNode json =
                     jsonMapper.readTree(rawResponse);
-            // 짧은 트랜잭션
-            // ReviewItem 저장 + COMPLETED 변경
+
+            metricsService.saveMetrics(reviewId, json);
+
             reviewTransactionService.complete(
                     reviewId,
                     rawResponse,

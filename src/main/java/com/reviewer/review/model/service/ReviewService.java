@@ -15,6 +15,7 @@ import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.ollama.client.OllamaClient;
 import com.reviewer.project.model.entity.ProjectEntity;
 import com.reviewer.project.validator.ProjectValidator;
+import com.reviewer.review.metrics.model.service.MetricsService;
 import com.reviewer.review.model.dao.BranchSourceRepository;
 import com.reviewer.review.model.dao.QuickSourceRepository;
 import com.reviewer.review.model.dao.ReviewItemRepository;
@@ -47,6 +48,7 @@ public class ReviewService {
 	private final ReviewItemRepository reviewItemRepository;
     private final JsonMapper jsonMapper;
     private final SystemSettingRepository systemSettingRepository;
+    private final MetricsService metricsService;
     @Value("${app.ollama.model}")
     private String model;
 	
@@ -65,6 +67,7 @@ public class ReviewService {
         JsonNode json =
                 jsonMapper.readTree(rawResponse);
         JsonNode reviews = json.get("reviews");
+        metricsService.saveMetrics(review.getReviewId(), json);
         for (JsonNode r : reviews) {
 
             ReviewItemEntity item =
