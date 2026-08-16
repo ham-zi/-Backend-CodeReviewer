@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.reviewer.auth.model.vo.CustomUserDetails;
 import com.reviewer.exception.common.NotFoundException;
+import com.reviewer.project.model.dto.ProjectDetailResponse;
 import com.reviewer.project.model.dto.ProjectDto;
 import com.reviewer.project.model.entity.ProjectEntity;
 import com.reviewer.project.model.repository.ProjectRepository;
@@ -47,4 +48,12 @@ public class ProjectService {
 		projectValidator.checkRuleToProject(project, rule);
 		project.updateRule(rule);
 	}
+	
+	public ProjectDetailResponse findByProjectId(CustomUserDetails user, Long projectId) {
+		ProjectEntity project = projectValidator.existsProject(projectId);
+		projectValidator.checkProjectMember(projectId, user.getUserId());
+		return ProjectDetailResponse.from(project);
+	}
+	
+
 }
