@@ -1,6 +1,9 @@
 package com.reviewer.review.model.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -10,8 +13,6 @@ import com.reviewer.auth.model.vo.CustomUserDetails;
 import com.reviewer.enums.ReviewResultRole;
 import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.exception.common.NotFoundException;
-import com.reviewer.github.model.dto.GithubCompareResponse;
-import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.ollama.client.OllamaClient;
 import com.reviewer.ollama.model.dto.OllamaResponse;
 import com.reviewer.project.model.entity.ProjectEntity;
@@ -23,10 +24,13 @@ import com.reviewer.review.model.dao.ReviewItemRepository;
 import com.reviewer.review.model.dao.ReviewRepository;
 import com.reviewer.review.model.dto.BranchReviewRequest;
 import com.reviewer.review.model.dto.QuickReviewRequest;
+import com.reviewer.review.model.dto.ReviewDetailResponse;
+import com.reviewer.review.model.dto.ReviewListResponse;
 import com.reviewer.review.model.entity.BranchSourceEntity;
 import com.reviewer.review.model.entity.QuickSourceEntity;
 import com.reviewer.review.model.entity.ReviewEntity;
 import com.reviewer.review.model.entity.ReviewItemEntity;
+import com.reviewer.review.validator.ReviewValidator;
 import com.reviewer.system.model.dao.SystemSettingRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +54,7 @@ public class ReviewService {
     private final JsonMapper jsonMapper;
     private final SystemSettingRepository systemSettingRepository;
     private final MetricsService metricsService;
+    private final ReviewValidator reviewValidator;
     @Value("${app.ollama.model}")
     private String model;
 	
@@ -123,6 +128,23 @@ public class ReviewService {
 			}
 		);
 			return review.getReviewId();
-		}
+	}
+	
+	public Page<ReviewListResponse> findAllByProjectId(CustomUserDetails user, Long projectId, ReviewTypeRole reviewType, int page) {
+		projectValidator.checkProjectMember(projectId, user.getUserId());
+		Pageable pageable = PageRequest.of(page-1, 10);
+		Page<ReviewEntity> reviews = reviewRepository.findAllByProject_ProjectIdAndReviewType(projectId, reviewType, pageable);
+		return reviews.map(ReviewListResponse::from);
+	}
+	
+	public ReviewDetailResponse findByReviewId(CustomUserDetails user, Long reviewId) {
+		ReviewEntity review = reviewValidator.existsReview(reviewId);
+		projectValidator.checkProjectMember(review.getProject().getProjectId(), user.getUserId());
+		return ReviewDetailResponse.from(review, 
+										 reviewItemRepository.findAllByReview(review),
+										 metricsService.findByReviewId(reviewId));
+	}
+	
+	
 	
 }

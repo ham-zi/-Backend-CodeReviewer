@@ -38,15 +38,12 @@ public class ReviewAsyncService {
             // PROCESSING 변경 + LAZY 데이터 추출
             ReviewProcessData data =
                     reviewTransactionService.start(reviewId);
-
             GithubCompareResponse response = githubClient.compare(data.gitRepoOwner(),
             		data.gitRepoName(),
             		reviewRequest.baseBranch(),
             		reviewRequest.headBranch());
             StringBuilder sb = new StringBuilder();
-
             sb.append("##리뷰 대상 코드##\n");
-
             for (GithubFileResponse file : response.files()) {
                 sb.append("파일: ")
                   .append(file.filename())

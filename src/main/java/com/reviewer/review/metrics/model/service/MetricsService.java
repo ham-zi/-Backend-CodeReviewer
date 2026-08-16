@@ -42,7 +42,7 @@ public class MetricsService {
     }
     
     public MetricsResponse findByReviewId(Long reviewId) {
-    	MetricsEntity metrics = metricsRepository.findById(reviewId).orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+    	MetricsEntity metrics = metricsRepository.findById(reviewId).orElse(null);
     	return MetricsResponse.from(metrics);
     }
     
