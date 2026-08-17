@@ -33,7 +33,7 @@ public class ProjectMemberService {
 	}
 	
 	public Page<ProjectListResponse> findAllByUserId(CustomUserDetails user, int page) {
-		Pageable pageable = PageRequest.of(page-1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+		Pageable pageable = PageRequest.of(page-1, 10, Sort.by(Sort.Direction.DESC, "project.createdAt"));
 		Page<ProjectEntity> projects = projectMemberRepository.findAllProjectByUserId(user.getUserId(), pageable);
 		return projects.map(ProjectListResponse::from);
 	}
