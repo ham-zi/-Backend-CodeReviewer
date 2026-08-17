@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -132,7 +133,7 @@ public class ReviewService {
 	
 	public Page<ReviewListResponse> findAllByProjectId(CustomUserDetails user, Long projectId, ReviewTypeRole reviewType, int page) {
 		projectValidator.checkProjectMember(projectId, user.getUserId());
-		Pageable pageable = PageRequest.of(page-1, 10);
+		Pageable pageable = PageRequest.of(page-1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 		Page<ReviewEntity> reviews = reviewRepository.findAllByProject_ProjectIdAndReviewType(projectId, reviewType, pageable);
 		return reviews.map(ReviewListResponse::from);
 	}

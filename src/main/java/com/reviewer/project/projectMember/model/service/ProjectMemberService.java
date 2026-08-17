@@ -3,6 +3,7 @@ package com.reviewer.project.projectMember.model.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,7 @@ public class ProjectMemberService {
 	}
 	
 	public Page<ProjectListResponse> findAllByUserId(CustomUserDetails user, int page) {
-		Pageable pageable = PageRequest.of(page-1, 10);
+		Pageable pageable = PageRequest.of(page-1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 		Page<ProjectEntity> projects = projectMemberRepository.findAllProjectByUserId(user.getUserId(), pageable);
 		return projects.map(ProjectListResponse::from);
 	}
