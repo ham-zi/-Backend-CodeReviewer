@@ -43,6 +43,7 @@ public class MetricsService {
     
     public MetricsResponse findByReviewId(Long reviewId) {
     	MetricsEntity metrics = metricsRepository.findById(reviewId).orElse(null);
+    	if(metrics == null) return null;
     	return MetricsResponse.from(metrics);
     }
     

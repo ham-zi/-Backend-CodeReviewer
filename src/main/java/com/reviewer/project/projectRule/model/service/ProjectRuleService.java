@@ -1,7 +1,9 @@
 package com.reviewer.project.projectRule.model.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,11 +38,10 @@ public class ProjectRuleService {
 		projectRuleRepository.save(entity);
 	}
 
-	public List<RulesResponse> findAll(CustomUserDetails user, Long projectId) {
+	public Page<RulesResponse> findAll(CustomUserDetails user, Long projectId, int page) {
+		Pageable pageable = PageRequest.of(page-1, 3, Sort.by(Sort.Direction.DESC, "createdAt"));
 		ProjectEntity project = projectValidator.checkProjectMember(projectId, user.getUserId());
-		List<ProjectRuleEntity> rules = projectRuleRepository.findAllByProject(project);
-		return rules.stream()
-					.map(RulesResponse :: from)
-					.toList();
+		Page<ProjectRuleEntity> rules = projectRuleRepository.findAllByProject(project, pageable);
+		return rules.map(RulesResponse::from);
 	}
 }
