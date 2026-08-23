@@ -1,5 +1,6 @@
 package com.reviewer.github.model.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,11 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import com.reviewer.github.model.dto.GithubBranchResponse;
-import com.reviewer.github.model.dto.GithubCompareResponse;
+import com.reviewer.github.model.dto.GithubFileResponse;
+import com.reviewer.github.model.dto.GithubPullRequestResponse;
 
 @Component
 public class GithubClient {
+
+    private static final int PR_PAGE_SIZE = 100;
+    private static final int PR_FILE_PAGE_SIZE = 100;
 
     private final RestClient restClient;
 
@@ -27,37 +31,106 @@ public class GithubClient {
                 .build();
     }
 
-    public List<GithubBranchResponse> getBranches(
+    /**
+     * GitHub REST API - List pull requests
+     * GET /repos/{owner}/{repo}/pulls
+     *
+     * 프로젝트 화면에서 사용자가 리뷰할 PR을 선택할 수 있도록
+     * 현재 열려 있는 PR 목록을 가져온다.
+     *
+     * state=open:
+     * - 이미 닫히거나 merge된 PR은 리뷰 대상 선택 목록에서 제외한다.
+     *
+     * sort=updated, direction=desc:
+     * - 최근에 변경된 PR부터 보여주기 위해 사용한다.
+     *
+     * GitHub API는 한 페이지당 최대 100개의 PR을 반환할 수 있으므로
+     * 100개 단위로 마지막 페이지까지 조회한다.
+     */
+    public List<GithubPullRequestResponse> getPullRequests(
             String owner,
-            String repository) {
+            String repository
+    ) {
 
-        GithubBranchResponse[] response = restClient.get()
-                .uri("/repos/{owner}/{repo}/branches",
-                        owner,
-                        repository)
-                .retrieve()
-                .body(GithubBranchResponse[].class);
+        List<GithubPullRequestResponse> pullRequests = new ArrayList<>();
+        int page = 1;
 
-        if (response == null) {
-            return List.of();
+        while (true) {
+            GithubPullRequestResponse[] response = restClient.get()
+                    .uri(
+                            "/repos/{owner}/{repo}/pulls?state=open&sort=updated&direction=desc&per_page={perPage}&page={page}",
+                            owner,
+                            repository,
+                            PR_PAGE_SIZE,
+                            page
+                    )
+                    .retrieve()
+                    .body(GithubPullRequestResponse[].class);
+
+            if (response == null || response.length == 0) {
+                break;
+            }
+
+            pullRequests.addAll(Arrays.asList(response));
+
+            if (response.length < PR_PAGE_SIZE) {
+                break;
+            }
+
+            page++;
         }
 
-        return Arrays.asList(response);
+        return pullRequests;
     }
 
-    public GithubCompareResponse compare(
+    /**
+     * GitHub REST API - List pull requests files
+     * GET /repos/{owner}/{repo}/pulls/{pull_number}/files
+     *
+     * PR 하나에서 실제로 변경된 파일과 각 파일의 patch(diff)를 가져온다.
+     * Branch Review에서 base/head를 직접 입력받아 compare API를 호출했던 것과 달리,
+     * PR 번호만 알면 GitHub가 PR의 base/head 관계를 이미 알고 있으므로
+     * PR에 포함된 변경 파일을 바로 조회할 수 있다.
+     *
+     * GitHub API는 기본 30개, 최대 100개씩 파일을 반환하므로
+     * 100개 단위로 조회하면서 마지막 페이지까지 가져온다.
+     */
+    public List<GithubFileResponse> getPullRequestFiles(
             String owner,
             String repository,
-            String base,
-            String head) {
+            Integer pullNumber
+    ) {
 
-        return restClient.get()
-                .uri("/repos/{owner}/{repo}/compare/{base}...{head}",
-                        owner,
-                        repository,
-                        base,
-                        head)
-                .retrieve()
-                .body(GithubCompareResponse.class);
+        List<GithubFileResponse> files = new ArrayList<>();
+        int page = 1;
+
+        while (true) {
+            GithubFileResponse[] response = restClient.get()
+                    .uri(
+                            "/repos/{owner}/{repo}/pulls/{pullNumber}/files?per_page={perPage}&page={page}",
+                            owner,
+                            repository,
+                            pullNumber,
+                            PR_FILE_PAGE_SIZE,
+                            page
+                    )
+                    .retrieve()
+                    .body(GithubFileResponse[].class);
+
+            if (response == null || response.length == 0) {
+                break;
+            }
+
+            files.addAll(Arrays.asList(response));
+
+            if (response.length < PR_FILE_PAGE_SIZE) {
+                break;
+            }
+
+            page++;
+        }
+
+        return files;
     }
+
 }

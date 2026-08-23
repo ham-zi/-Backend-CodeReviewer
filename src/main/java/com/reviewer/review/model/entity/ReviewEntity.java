@@ -29,70 +29,76 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ReviewEntity {
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long reviewId;
-	@JoinColumn(name = "PROJECT_ID", nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)
-	private ProjectEntity project;
-	@Enumerated(EnumType.STRING)
-	@Column(name = "REVIEW_TYPE",nullable = false, length = 20)
-	private ReviewTypeRole reviewType;
-	@JoinColumn(name = "RULE_ID", nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)
-	private ProjectRuleEntity projectRule;
-	@Enumerated(EnumType.STRING)
-	@Column(name = "STATUS", nullable = false, length = 20)
-	private ReviewStatusRole status;
-	@JoinColumn(name = "SYSTEM_PROMPT_ID", nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)
-	private SystemPromptEntity systemPrompt;
-	@Column(name = "AI_MODEL", nullable = false, length = 100)
-	private String aiModel;
-	@Column(name = "RAW_RESPONSE", columnDefinition = "TEXT")
-	private String rawResponse;
-	@Column(name = "CREATED_AT", nullable = false, updatable = false)
-	private Instant createdAt;
-	
-	private ReviewEntity(ProjectEntity project,
-			             ReviewTypeRole reviewType,
-			             ProjectRuleEntity projectRule,
-			             SystemPromptEntity systemPrompt,
-			             String aiModel) {
-		this.project = project;
-		this.reviewType = reviewType;
-		this.projectRule = projectRule;
-		this.status = ReviewStatusRole.PENDING;
-		this.systemPrompt = systemPrompt;
-		this.aiModel = aiModel;
-	}
-	
-	public static ReviewEntity of(ProjectEntity project,
-					              ReviewTypeRole reviewType,
-					              ProjectRuleEntity projectRule,
-					              SystemPromptEntity systemPrompt,
-					              String aiModel) {
-		return new ReviewEntity(project,
-								reviewType,
-								projectRule,
-								systemPrompt,
-								aiModel);
-	}
-	
-	@PrePersist
-	private void onCreated() {
-		createdAt = Instant.now();
-	}
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long reviewId;
+    @JoinColumn(name = "PROJECT_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ProjectEntity project;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "REVIEW_TYPE",nullable = false, length = 20)
+    private ReviewTypeRole reviewType;
+    @JoinColumn(name = "RULE_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ProjectRuleEntity projectRule;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", nullable = false, length = 20)
+    private ReviewStatusRole status;
+    @JoinColumn(name = "SYSTEM_PROMPT_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private SystemPromptEntity systemPrompt;
+    @Column(name = "AI_MODEL", nullable = false, length = 100)
+    private String aiModel;
+    @Column(name = "GENERAL_RAW_RESPONSE", columnDefinition = "TEXT")
+    private String generalRawResponse;
+    @Column(name = "RULE_RAW_RESPONSE", columnDefinition = "TEXT")
+    private String ruleRawResponse;
+    @Column(name = "CREATED_AT", nullable = false, updatable = false)
+    private Instant createdAt;
 
-	public void start() {
-	    this.status = ReviewStatusRole.PROCESSING;
-	}
+    private ReviewEntity(ProjectEntity project,
+                         ReviewTypeRole reviewType,
+                         ProjectRuleEntity projectRule,
+                         SystemPromptEntity systemPrompt,
+                         String aiModel) {
+        this.project = project;
+        this.reviewType = reviewType;
+        this.projectRule = projectRule;
+        this.status = ReviewStatusRole.PENDING;
+        this.systemPrompt = systemPrompt;
+        this.aiModel = aiModel;
+    }
 
-	public void complete(String rawResponse) {
-	    this.rawResponse = rawResponse;
-	    this.status = ReviewStatusRole.COMPLETED;
-	}
+    public static ReviewEntity of(ProjectEntity project,
+                                  ReviewTypeRole reviewType,
+                                  ProjectRuleEntity projectRule,
+                                  SystemPromptEntity systemPrompt,
+                                  String aiModel) {
+        return new ReviewEntity(project,
+                                reviewType,
+                                projectRule,
+                                systemPrompt,
+                                aiModel);
+    }
 
-	public void fail() {
-	    this.status = ReviewStatusRole.FAILED;
-	}
+    @PrePersist
+    private void onCreated() {
+        createdAt = Instant.now();
+    }
+
+    public void start() {
+        this.status = ReviewStatusRole.PROCESSING;
+    }
+
+    public void complete(
+            String generalRawResponse,
+            String ruleRawResponse
+    ) {
+        this.generalRawResponse = generalRawResponse;
+        this.ruleRawResponse = ruleRawResponse;
+        this.status = ReviewStatusRole.COMPLETED;
+    }
+
+    public void fail() {
+        this.status = ReviewStatusRole.FAILED;
+    }
 }

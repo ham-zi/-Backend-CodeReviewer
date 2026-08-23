@@ -8,6 +8,7 @@ import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.review.metrics.model.dto.MetricsResponse;
 import com.reviewer.review.model.entity.ReviewEntity;
 import com.reviewer.review.model.entity.ReviewItemEntity;
+import com.reviewer.review.model.entity.RuleReviewItemEntity;
 
 public record ReviewDetailResponse(
         Long reviewId,
@@ -16,18 +17,25 @@ public record ReviewDetailResponse(
         String aiModel,
         Instant createdAt,
         List<ReviewItemResponse> items,
+        List<RuleReviewItemResponse> ruleItems,
         MetricsResponse metrics
 ) {
 
     public static ReviewDetailResponse from(
             ReviewEntity review,
             List<ReviewItemEntity> reviewItems,
+            List<RuleReviewItemEntity> ruleReviewItems,
             MetricsResponse metrics
     ) {
 
         List<ReviewItemResponse> items =
                 reviewItems.stream()
                         .map(ReviewItemResponse::from)
+                        .toList();
+
+        List<RuleReviewItemResponse> ruleItems =
+                ruleReviewItems.stream()
+                        .map(RuleReviewItemResponse::from)
                         .toList();
 
         return new ReviewDetailResponse(
@@ -37,6 +45,7 @@ public record ReviewDetailResponse(
                 review.getAiModel(),
                 review.getCreatedAt(),
                 items,
+                ruleItems,
                 metrics
         );
     }

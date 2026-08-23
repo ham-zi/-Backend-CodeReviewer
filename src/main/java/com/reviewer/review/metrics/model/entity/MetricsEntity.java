@@ -21,80 +21,51 @@ import lombok.NoArgsConstructor;
 public class MetricsEntity {
 
     @Id
-    @Column(name = "review_id")
+    @Column(name = "REVIEW_ID")
     private Long reviewId;
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_id")
+    @JoinColumn(name = "REVIEW_ID")
     private ReviewEntity review;
 
     /**
-     * 입력 프롬프트 토큰 수
+     * Provider 공통 입력 토큰 수
      * Ollama: prompt_eval_count
+     * OpenAI: input_tokens
      */
-    @Column(name = "prompt_eval_count")
-    private Integer promptEvalCount;
+    @Column(name = "INPUT_TOKEN_COUNT")
+    private Integer inputTokenCount;
 
     /**
-     * 모델이 생성한 출력 토큰 수
+     * Provider 공통 출력 토큰 수
      * Ollama: eval_count
+     * OpenAI: output_tokens
      */
-    @Column(name = "eval_count")
-    private Integer evalCount;
+    @Column(name = "OUTPUT_TOKEN_COUNT")
+    private Integer outputTokenCount;
 
     /**
-     * 모델 로딩 시간
-     * Ollama: load_duration
+     * AI API 실제 호출에 걸린 시간
+     * System.nanoTime()의 차이값을 사용한다.
      * 단위: nanoseconds
      */
-    @Column(name = "load_duration")
-    private Long loadDuration;
-
-    /**
-     * 입력 프롬프트 처리 시간
-     * Ollama: prompt_eval_duration
-     * 단위: nanoseconds
-     */
-    @Column(name = "prompt_eval_duration")
-    private Long promptEvalDuration;
-
-    /**
-     * 모델 응답 생성 시간
-     * Ollama: eval_duration
-     * 단위: nanoseconds
-     */
-    @Column(name = "eval_duration")
-    private Long evalDuration;
-
-    /**
-     * 전체 요청 처리 시간
-     * Ollama: total_duration
-     * 단위: nanoseconds
-     */
-    @Column(name = "total_duration")
-    private Long totalDuration;
-
+    @Column(name = "RESPONSE_TIME")
+    private Long responseTime;
 
     public static MetricsEntity create(
             ReviewEntity review,
-            Integer promptEvalCount,
-            Integer evalCount,
-            Long loadDuration,
-            Long promptEvalDuration,
-            Long evalDuration,
-            Long totalDuration
+            Integer inputTokenCount,
+            Integer outputTokenCount,
+            Long responseTime
     ) {
 
         MetricsEntity metrics = new MetricsEntity();
 
         metrics.review = review;
-        metrics.promptEvalCount = promptEvalCount;
-        metrics.evalCount = evalCount;
-        metrics.loadDuration = loadDuration;
-        metrics.promptEvalDuration = promptEvalDuration;
-        metrics.evalDuration = evalDuration;
-        metrics.totalDuration = totalDuration;
+        metrics.inputTokenCount = inputTokenCount;
+        metrics.outputTokenCount = outputTokenCount;
+        metrics.responseTime = responseTime;
 
         return metrics;
     }

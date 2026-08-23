@@ -33,7 +33,7 @@ public class SystemPromptService {
 	private final SystemPromptRepository systemPromptRepository;
 	private final SystemSettingRepository systemSettingRepository;
 	
-	public String findCurrentGeneralPrompt(ReviewTypeRole type) {
+	public String getCurrentGeneralPrompt(ReviewTypeRole type) {
 
 	    SystemSettingEntity setting =
 	            systemSettingRepository.findById(type)
@@ -47,7 +47,7 @@ public class SystemPromptService {
 	}
 
 
-	public String findCurrentRulePrompt(ReviewTypeRole type) {
+	public String getCurrentRulePrompt(ReviewTypeRole type) {
 
 	    SystemSettingEntity setting =
 	            systemSettingRepository.findById(type)

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.reviewer.api.model.vo.ApiResponse;
 import com.reviewer.auth.model.vo.CustomUserDetails;
-import com.reviewer.github.model.dto.BranchResponse;
+import com.reviewer.github.model.dto.PullRequestResponse;
 import com.reviewer.github.model.service.GithubService;
 import com.reviewer.project.model.dto.ProjectDetailResponse;
 import com.reviewer.project.model.dto.ProjectDto;
@@ -54,12 +54,19 @@ public class ProjectController {
 	}
 
 	
-	@GetMapping("/{projectId}/git/branches")
-	public ResponseEntity<ApiResponse<List<BranchResponse>>> getBranches(@PathVariable(name = "projectId")Long projectId,
-			 															 @AuthenticationPrincipal CustomUserDetails user) {
-		return ResponseEntity.ok(ApiResponse.success("브랜치 조회에 성공했습니다.", githubService.getBranches(projectId, user)));
+	@GetMapping("/{projectId}/git/pulls")
+	public ResponseEntity<ApiResponse<List<PullRequestResponse>>> getPullRequests(
+			@PathVariable(name = "projectId") Long projectId,
+			@AuthenticationPrincipal CustomUserDetails user) {
+
+		return ResponseEntity.ok(
+				ApiResponse.success(
+						"PR 목록 조회에 성공했습니다.",
+						githubService.getPullRequests(projectId, user)
+				)
+		);
 	}
-	
+
 	@GetMapping("/{projectId}")
 	public ResponseEntity<ApiResponse<ProjectDetailResponse>> findByProjectId(@AuthenticationPrincipal CustomUserDetails user,
 																			  @PathVariable(name="projectId") Long projectId) {
