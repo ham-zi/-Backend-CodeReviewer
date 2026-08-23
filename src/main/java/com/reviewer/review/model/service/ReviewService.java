@@ -85,7 +85,7 @@ public class ReviewService {
         
         metricsService.saveMetrics(review.getReviewId(), ollamaResponse);
         for (JsonNode r : reviews) {
-
+        	 log.info("REVIEW ITEM RAW = {}", r.toPrettyString());
             ReviewItemEntity item =
                     ReviewItemEntity.of(
                             review,

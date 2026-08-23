@@ -33,7 +33,7 @@ public class SystemPromptService {
 	private final SystemPromptRepository systemPromptRepository;
 	private final SystemSettingRepository systemSettingRepository;
 	
-	public String findCurrentPrompt(ReviewTypeRole type) {
+	public String findCurrentGeneralPrompt(ReviewTypeRole type) {
 
 	    SystemSettingEntity setting =
 	            systemSettingRepository.findById(type)
@@ -43,13 +43,28 @@ public class SystemPromptService {
 	                            )
 	                    );
 
-	    return setting.getSystemPrompt().getPrompt();
+	    return setting.getSystemPrompt().getGeneralPrompt();
+	}
+
+
+	public String findCurrentRulePrompt(ReviewTypeRole type) {
+
+	    SystemSettingEntity setting =
+	            systemSettingRepository.findById(type)
+	                    .orElseThrow(() ->
+	                            new NotFoundException(
+	                                    "존재하지 않는 시스템 프롬프트 설정입니다."
+	                            )
+	                    );
+
+	    return setting.getSystemPrompt().getRulePrompt();
 	}
 	
 	@Transactional
 	public void save(SystemPromptDto prompt) {
 		ValidateVersion(prompt.getType(), prompt.getVersion());
-		systemPromptRepository.save(SystemPromptEntity.of(prompt.getPrompt(),
+		systemPromptRepository.save(SystemPromptEntity.of(prompt.getGeneralPrompt(),
+														  prompt.getRulePrompt(),
 														  prompt.getVersion(),
 														  prompt.getImprovement(),
 														  prompt.getType()));
