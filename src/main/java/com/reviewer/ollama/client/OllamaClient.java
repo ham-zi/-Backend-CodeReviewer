@@ -1,16 +1,18 @@
 package com.reviewer.ollama.client;
+
 import java.time.Duration;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import com.reviewer.ai.client.AiReviewClient;
+import com.reviewer.ai.model.dto.AiReviewResponse;
 import com.reviewer.configuration.OllamaProperties;
-import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.ollama.model.dto.OllamaOptions;
 import com.reviewer.ollama.model.dto.OllamaRequest;
 import com.reviewer.ollama.model.dto.OllamaResponse;
-import com.reviewer.system.model.service.SystemPromptService;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.netty.http.client.HttpClient;
@@ -18,20 +20,22 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
+@ConditionalOnProperty(
+        name = "app.ai.provider",
+        havingValue = "ollama",
+        matchIfMissing = true
+)
 @Slf4j
-public class OllamaClient {
+public class OllamaClient implements AiReviewClient {
 
     private final RestClient restClient;
     private final OllamaProperties properties;
-    private final SystemPromptService systemPromptService;
     private final ObjectMapper objectMapper;
 
     public OllamaClient(
             OllamaProperties properties,
-            SystemPromptService systemPromptService,
             ObjectMapper objectMapper
     ) {
-
         HttpClient httpClient = HttpClient.create()
                 .responseTimeout(Duration.ofMinutes(30));
 
@@ -44,29 +48,20 @@ public class OllamaClient {
                 .build();
 
         this.properties = properties;
-        this.systemPromptService = systemPromptService;
         this.objectMapper = objectMapper;
     }
 
-    public OllamaResponse quickReview(String prompt) {
-        return review(prompt, ReviewTypeRole.QUICK);
-    }
-
-    public OllamaResponse branchReview(String prompt) {
-        return review(prompt, ReviewTypeRole.BRANCH);
-    }
-
-    private OllamaResponse review(
+    @Override
+    public AiReviewResponse review(
+            String systemPrompt,
             String prompt,
-            ReviewTypeRole reviewType
+            String formatSchema
     ) {
 
-        String systemPrompt = systemPromptService.findCurrentPrompt(reviewType);
-        
         JsonNode format;
 
         try {
-            format = objectMapper.readTree(properties.format());
+            format = objectMapper.readTree(formatSchema);
         } catch (Exception e) {
             throw new IllegalStateException(
                     "Ollama JSON Schema 파싱 실패",
@@ -85,11 +80,16 @@ public class OllamaClient {
                         properties.temperature()
                 )
         );
+
+        long startTime = System.nanoTime();
+
         OllamaResponse response = restClient.post()
                 .uri("/api/generate")
                 .body(request)
                 .retrieve()
                 .body(OllamaResponse.class);
+
+        long responseTime = System.nanoTime() - startTime;
 
         if (response == null) {
             throw new IllegalStateException(
@@ -97,6 +97,17 @@ public class OllamaClient {
             );
         }
 
-        return response;
+        return new AiReviewResponse(
+                response.model(),
+                response.response(),
+                response.promptEvalCount(),
+                response.evalCount(),
+                responseTime
+        );
+    }
+
+    @Override
+    public String getModel() {
+        return properties.model();
     }
 }
