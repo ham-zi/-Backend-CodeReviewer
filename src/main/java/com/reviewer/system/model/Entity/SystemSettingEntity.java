@@ -16,20 +16,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="SYSTEM_PROMPT_SETTING")
+@Table(name = "SYSTEM_PROMPT_SETTING")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class SystemSettingEntity {
-    @Id
-    @Enumerated(EnumType.STRING)
-    @Column(name = "TYPE")
-    private ReviewTypeRole type;
+	@Id
+	@Enumerated(EnumType.STRING)
+	@Column(name = "TYPE")
+	private ReviewTypeRole type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SYSTEM_PROMPT_ID", nullable = false)
-    private SystemPromptEntity systemPrompt;
-    
-    public void changePrompt(SystemPromptEntity prompt) {
-        this.systemPrompt = prompt;
-    }
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "SYSTEM_PROMPT_ID", nullable = false)
+	private SystemPromptEntity systemPrompt;
+
+	public void changePrompt(SystemPromptEntity prompt) {
+		this.systemPrompt = prompt;
+	}
 }

@@ -22,9 +22,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "PROJECT", uniqueConstraints = {
-		@UniqueConstraint(name = "UK_PE_REPO_URL", columnNames = "REPOSITORY_URL")
-})
+@Table(
+    name = "PROJECT",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "UK_PE_REPO",
+            columnNames = {
+                "GIT_REPO_OWNER",
+                "GIT_REPO_NAME"
+            }
+        )
+    }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ProjectEntity {
