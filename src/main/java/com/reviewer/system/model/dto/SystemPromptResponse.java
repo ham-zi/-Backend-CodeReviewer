@@ -6,14 +6,16 @@ import com.reviewer.enums.ReviewTypeRole;
 import com.reviewer.system.model.Entity.SystemPromptEntity;
 
 public record SystemPromptResponse(Long systemPromptId,
-								   String prompt,
+								   String generalPrompt,
+								   String rulePrompt,
 								   String version,
 								   String improvement,
 								   ReviewTypeRole type,
 								   Instant createdAt) {
 	public static SystemPromptResponse from(SystemPromptEntity prompt) {
 		return new SystemPromptResponse(prompt.getSystemPromptId(),
-										prompt.getPrompt(),
+										prompt.getGeneralPrompt(),
+										prompt.getRulePrompt(),
 										prompt.getVersion(),
 										prompt.getImprovement(),
 										prompt.getType(),
