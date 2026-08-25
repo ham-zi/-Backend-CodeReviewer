@@ -20,13 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/users")
 @Slf4j
 public class UserController {
-	
+
 	private final UserService userService;
 
-	
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid UserDto user){
+	public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid UserDto user) {
 		userService.signUp(user);
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created("계정 생성 성공", null));
 	}
+
 }

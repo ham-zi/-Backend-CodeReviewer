@@ -30,7 +30,6 @@ public class UserDto {
 	@NotBlank(message="이름은 비어있을 수 없습니다.")
 	private String name;
 	private String role;
-	private boolean active;
 	private Instant createdAt;
 	private Instant lastLoginAt;
 	private String imageUrl;

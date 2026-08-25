@@ -1,6 +1,6 @@
 package com.reviewer.project.projectMember.model.repository;
 
-
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -15,15 +15,21 @@ import com.reviewer.project.projectMember.model.Entity.ProjectMemberEntity;
 import com.reviewer.user.model.entity.UserEntity;
 
 public interface ProjectMemberRepository extends JpaRepository<ProjectMemberEntity, Long> {
-	boolean existsByProjectAndUser(ProjectEntity project, UserEntity userId);
-	Optional<ProjectMemberEntity> findByProjectAndProjectMemberRole(ProjectEntity project, ProjectMemberRole role);
-	@Query("""
-		    SELECT pm.project
-		    FROM ProjectMemberEntity pm
-		    WHERE pm.user.id = :userId
-		   """)
-		Page<ProjectEntity> findAllProjectByUserId(
-		        @Param("userId") Long userId,
-		        Pageable pageable
-		);
+    boolean existsByProjectAndUser(ProjectEntity project, UserEntity user);
+
+    Optional<ProjectMemberEntity> findByProjectAndProjectMemberRole(ProjectEntity project, ProjectMemberRole role);
+
+    Optional<ProjectMemberEntity> findByProjectAndProjectMemberId(ProjectEntity project, Long projectMemberId);
+
+    List<ProjectMemberEntity> findAllByProjectOrderByJoinedAtAsc(ProjectEntity project);
+
+    @Query("""
+            SELECT pm.project
+            FROM ProjectMemberEntity pm
+            WHERE pm.user.id = :userId
+           """)
+    Page<ProjectEntity> findAllProjectByUserId(
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
 }

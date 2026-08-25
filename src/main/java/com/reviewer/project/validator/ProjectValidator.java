@@ -41,7 +41,7 @@ public class ProjectValidator {
 		ProjectMemberEntity member = projectMemberRepository.findByProjectAndProjectMemberRole(projectRepository.findById(projectId).orElseThrow(()-> new NotFoundException("프로젝트가 존재하지 않습니다.")),
 																					 ProjectMemberRole.OWNER).orElseThrow(()-> new NotFoundException("Owner가 존재하지 않습니다."));
 		if(!member.getUser().getId().equals(userId)) {
-			throw new AccessDeniedException("규칙을 관리에 대한 권한이 부족합니다.");
+			throw new AccessDeniedException("프로젝트 관리 권한이 부족합니다.");
 		}
 	}
 	
