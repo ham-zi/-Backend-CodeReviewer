@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,21 +23,28 @@ import com.reviewer.project.model.dto.ProjectDetailResponse;
 import com.reviewer.project.model.dto.ProjectDto;
 import com.reviewer.project.model.dto.ProjectListResponse;
 import com.reviewer.project.model.service.ProjectService;
+import com.reviewer.project.projectMember.model.dto.ProjectMemberCreateRequest;
+import com.reviewer.project.projectMember.model.dto.ProjectMemberResponse;
 import com.reviewer.project.projectMember.model.service.ProjectMemberService;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/projects")
-@Slf4j
 public class ProjectController {
 
 	private final GithubService githubService;
 	private final ProjectService projectService;
 	private final ProjectMemberService projectMemberService;
+
+	public ProjectController(
+			GithubService githubService,
+			ProjectService projectService,
+			ProjectMemberService projectMemberService) {
+		this.githubService = githubService;
+		this.projectService = projectService;
+		this.projectMemberService = projectMemberService;
+	}
 	
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> saveProject(@Valid @RequestBody ProjectDto project,
@@ -54,6 +62,37 @@ public class ProjectController {
 	}
 
 	
+
+	@GetMapping("/{projectId}/members")
+	public ResponseEntity<ApiResponse<List<ProjectMemberResponse>>> findProjectMembers(
+			@PathVariable(name = "projectId") Long projectId,
+			@AuthenticationPrincipal CustomUserDetails user) {
+		return ResponseEntity.ok(ApiResponse.success(
+				"프로젝트 팀원 조회에 성공했습니다.",
+				projectMemberService.findAllMembers(projectId, user)
+		));
+	}
+
+	@PostMapping("/{projectId}/members")
+	public ResponseEntity<ApiResponse<ProjectMemberResponse>> addProjectMember(
+			@PathVariable(name = "projectId") Long projectId,
+			@Valid @RequestBody ProjectMemberCreateRequest request,
+			@AuthenticationPrincipal CustomUserDetails user) {
+		return ResponseEntity.ok(ApiResponse.created(
+				"프로젝트 팀원 추가에 성공했습니다.",
+				projectMemberService.addMember(projectId, request, user)
+		));
+	}
+
+	@DeleteMapping("/{projectId}/members/{projectMemberId}")
+	public ResponseEntity<ApiResponse<Void>> removeProjectMember(
+			@PathVariable(name = "projectId") Long projectId,
+			@PathVariable(name = "projectMemberId") Long projectMemberId,
+			@AuthenticationPrincipal CustomUserDetails user) {
+		projectMemberService.removeMember(projectId, projectMemberId, user);
+		return ResponseEntity.ok(ApiResponse.noContent("프로젝트 팀원 삭제에 성공했습니다.", null));
+	}
+
 	@GetMapping("/{projectId}/git/pulls")
 	public ResponseEntity<ApiResponse<List<PullRequestResponse>>> getPullRequests(
 			@PathVariable(name = "projectId") Long projectId,
