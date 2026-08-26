@@ -10,6 +10,9 @@ import org.springframework.web.client.RestClient;
 
 import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.github.model.dto.GithubPullRequestResponse;
+import com.reviewer.github.webhook.model.dto.GithubCommentRequest;
+
+import tools.jackson.databind.JsonNode;
 
 @Component
 public class GithubClient {
@@ -131,6 +134,38 @@ public class GithubClient {
         }
 
         return files;
+    }
+
+    /**
+     * PR 전체에 대한 리뷰 요약을 Conversation 탭의 타임라인 코멘트로 등록한다.
+     * Pull Request는 GitHub Issues API의 issue comment endpoint를 함께 사용한다.
+     */
+    public String createPullRequestComment(
+            String owner,
+            String repository,
+            Integer pullNumber,
+            String body
+    ) {
+        JsonNode response = restClient.post()
+                .uri(
+                        "/repos/{owner}/{repo}/issues/{pullNumber}/comments",
+                        owner,
+                        repository,
+                        pullNumber
+                )
+                .body(new GithubCommentRequest(body))
+                .retrieve()
+                .body(JsonNode.class);
+
+        JsonNode htmlUrl = response == null ? null : response.get("html_url");
+
+        if (htmlUrl == null || !htmlUrl.isString()) {
+            throw new IllegalStateException(
+                    "GitHub PR 코멘트 생성 응답에 html_url이 없습니다."
+            );
+        }
+
+        return htmlUrl.asText();
     }
 
 }

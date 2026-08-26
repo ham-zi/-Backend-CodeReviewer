@@ -4,7 +4,9 @@ import org.springframework.stereotype.Service;
 
 import com.reviewer.ai.model.dto.AiReviewResponse;
 import com.reviewer.enums.ReviewResultRole;
+import com.reviewer.enums.ReviewStatusRole;
 import com.reviewer.exception.common.NotFoundException;
+import com.reviewer.github.webhook.model.dto.GithubReviewCommentData;
 import com.reviewer.review.metrics.model.service.MetricsService;
 import com.reviewer.review.model.dao.PrSourceRepository;
 import com.reviewer.review.model.dao.QuickSourceRepository;
@@ -180,6 +182,29 @@ public class ReviewTransactionService {
 
         ReviewEntity review = getReview(reviewId);
         review.fail();
+    }
+
+    @Transactional
+    public GithubReviewCommentData getGithubReviewCommentData(Long reviewId) {
+        ReviewEntity review = getReview(reviewId);
+
+        if (review.getStatus() != ReviewStatusRole.COMPLETED) {
+            throw new IllegalStateException(
+                    "완료되지 않은 리뷰는 GitHub 코멘트로 등록할 수 없습니다."
+            );
+        }
+
+        return new GithubReviewCommentData(
+                review.getReviewId(),
+                review.getAiModel(),
+                review.getGeneralRawResponse(),
+                review.getRuleRawResponse()
+        );
+    }
+
+    @Transactional
+    public boolean isCompleted(Long reviewId) {
+        return getReview(reviewId).getStatus() == ReviewStatusRole.COMPLETED;
     }
 
     private ReviewEntity getReview(Long reviewId) {
