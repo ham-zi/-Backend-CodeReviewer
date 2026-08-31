@@ -10,7 +10,9 @@ Spring Boot 기반 코드 리뷰 API입니다. 수동 Quick/PR 리뷰와 함께 
 - `reopened`: PR이 다시 열림
 - `synchronize`: PR head 브랜치에 새 커밋이 push되거나 force-push됨
 
-리뷰가 완료되면 일반 코드 리뷰와 팀 규칙 리뷰를 하나의 GitHub PR 타임라인 코멘트로 등록합니다. 동일한 repository/PR/head SHA는 한 번만 처리하며, 실패한 GitHub delivery가 재전송되면 이어서 다시 시도합니다.
+리뷰가 완료되면 결과를 **위험 / 주의 / 권고**로 분류합니다. 정확한 변경 라인을 찾은 항목은 해당 라인에 인라인 리뷰로 등록하고, PR Conversation 하단에는 분류별 건수와 항목명만 표로 요약합니다. AI가 지정한 시작 라인이 diff의 추가 라인이 아니면 시작 라인부터 `+2` 라인까지 확인해 안전하게 연결하며, 연결할 수 없는 항목은 요약 표에만 남깁니다.
+
+동일한 repository/PR/head SHA는 한 번만 처리하며, 실패한 GitHub delivery가 재전송되면 이어서 다시 시도합니다.
 
 ## 필수 환경 변수
 

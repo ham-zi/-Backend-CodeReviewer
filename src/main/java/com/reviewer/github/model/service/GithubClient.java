@@ -11,6 +11,8 @@ import org.springframework.web.client.RestClient;
 import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.github.model.dto.GithubPullRequestResponse;
 import com.reviewer.github.webhook.model.dto.GithubCommentRequest;
+import com.reviewer.github.webhook.model.dto.GithubInlineReviewComment;
+import com.reviewer.github.webhook.model.dto.GithubPullRequestReviewRequest;
 
 import tools.jackson.databind.JsonNode;
 
@@ -162,6 +164,46 @@ public class GithubClient {
         if (htmlUrl == null || !htmlUrl.isString()) {
             throw new IllegalStateException(
                     "GitHub PR 코멘트 생성 응답에 html_url이 없습니다."
+            );
+        }
+
+        return htmlUrl.asText();
+    }
+
+    /**
+     * PR diff의 변경 후 라인에 인라인 리뷰 코멘트를 한 번의 review로 등록한다.
+     */
+    public String createPullRequestReview(
+            String owner,
+            String repository,
+            Integer pullNumber,
+            String headSha,
+            List<GithubInlineReviewComment> comments
+    ) {
+        if (comments.isEmpty()) {
+            return null;
+        }
+
+        JsonNode response = restClient.post()
+                .uri(
+                        "/repos/{owner}/{repo}/pulls/{pullNumber}/reviews",
+                        owner,
+                        repository,
+                        pullNumber
+                )
+                .body(new GithubPullRequestReviewRequest(
+                        headSha,
+                        "COMMENT",
+                        comments
+                ))
+                .retrieve()
+                .body(JsonNode.class);
+
+        JsonNode htmlUrl = response == null ? null : response.get("html_url");
+
+        if (htmlUrl == null || !htmlUrl.isString()) {
+            throw new IllegalStateException(
+                    "GitHub PR 인라인 리뷰 생성 응답에 html_url이 없습니다."
             );
         }
 
