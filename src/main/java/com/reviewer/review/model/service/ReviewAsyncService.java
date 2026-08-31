@@ -10,6 +10,7 @@ import com.reviewer.enums.ReviewStatusRole;
 import com.reviewer.github.model.dto.GithubFileResponse;
 import com.reviewer.github.model.service.GithubClient;
 import com.reviewer.github.webhook.model.dto.GithubReviewCommentData;
+import com.reviewer.github.webhook.model.dto.GithubFormattedReview;
 import com.reviewer.github.webhook.model.dto.GithubWebhookReviewWork;
 import com.reviewer.github.webhook.model.service.GithubReviewCommentFormatter;
 import com.reviewer.github.webhook.model.service.GithubWebhookDeliveryService;
@@ -57,7 +58,7 @@ public class ReviewAsyncService {
     public void processPr(Long reviewId) {
 
         try {
-            PrReviewProcessData data = processPrReview(reviewId);
+            PrReviewProcessData data = processPrReview(reviewId).data();
 
             log.info(
                     "PR 비동기 코드 리뷰 완료. reviewId={}, pullNumber={}",
@@ -77,8 +78,16 @@ public class ReviewAsyncService {
         try {
             work = webhookDeliveryService.start(webhookDeliveryId);
 
+            List<GithubFileResponse> files;
+
             if (work.reviewStatus() != ReviewStatusRole.COMPLETED) {
-                processPrReview(work.reviewId());
+                files = processPrReview(work.reviewId()).files();
+            } else {
+                files = githubClient.getPullRequestFiles(
+                        work.repositoryOwner(),
+                        work.repositoryName(),
+                        work.pullNumber()
+                );
             }
 
             GithubReviewCommentData commentData =
@@ -86,16 +95,25 @@ public class ReviewAsyncService {
                             work.reviewId()
                     );
 
-            String comment = commentFormatter.format(
+            GithubFormattedReview formattedReview = commentFormatter.format(
                     commentData,
-                    work.headSha()
+                    work.headSha(),
+                    files
+            );
+
+            githubClient.createPullRequestReview(
+                    work.repositoryOwner(),
+                    work.repositoryName(),
+                    work.pullNumber(),
+                    work.headSha(),
+                    formattedReview.inlineComments()
             );
 
             String commentUrl = githubClient.createPullRequestComment(
                     work.repositoryOwner(),
                     work.repositoryName(),
                     work.pullNumber(),
-                    comment
+                    formattedReview.summary()
             );
 
             webhookDeliveryService.complete(
@@ -138,7 +156,7 @@ public class ReviewAsyncService {
         }
     }
 
-    private PrReviewProcessData processPrReview(Long reviewId) {
+    private PrReviewExecution processPrReview(Long reviewId) {
         PrReviewProcessData data =
                 reviewTransactionService.startPr(reviewId);
 
@@ -168,7 +186,7 @@ public class ReviewAsyncService {
                 );
 
         teamReviewProcessor.process(reviewId, reviewData);
-        return data;
+        return new PrReviewExecution(data, files);
     }
 
     private String createPrSource(
@@ -276,5 +294,11 @@ public class ReviewAsyncService {
                     failException
             );
         }
+    }
+
+    private record PrReviewExecution(
+            PrReviewProcessData data,
+            List<GithubFileResponse> files
+    ) {
     }
 }
