@@ -38,10 +38,10 @@ public class ReviewItemEntity {
     @Column(name = "RESULT", nullable = false, length = 30)
     private ReviewResultRole result;
 
-    @Column(name = "TITLE", nullable = false, length = 200)
+    @Column(name = "TITLE", nullable = false, length = 500)
     private String title;
     
-    @Column(name = "LOCATION", length = 300)
+    @Column(name = "LOCATION", length = 1000)
     private String location;
 
     @Column(name = "EVIDENCE", columnDefinition = "TEXT")
