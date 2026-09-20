@@ -4,7 +4,7 @@
 
 코드를 직접 입력하거나 GitHub PR을 선택해 리뷰를 요청할 수 있습니다. GitHub Webhook을 연결하면 PR 생성·업데이트 시 자동으로 리뷰를 실행하고, 변경 코드 옆에 인라인 댓글과 전체 요약을 남깁니다.
 
-[Frontend 저장소](https://github.com/ham-zi/-Frontend-CodeReviewer) · [설계·문제 해결·모델 비교 기록](./PORTFOLIO.md)
+[Frontend 저장소](https://github.com/ham-zi/-Frontend-CodeReviewer) · [기술 의사결정 기록](./TECHNICAL_DECISIONS.md)
 
 ## 개발 배경
 
@@ -38,6 +38,12 @@
 | Integration | GitHub REST API, GitHub Webhook, Spring RestClient |
 | Build / Test | Gradle Wrapper, JUnit, Spring Boot Test |
 
+## 시스템 아키텍처
+
+![ReviewMate 시스템 아키텍처](./docs/reviewmate-architecture.png)
+
+클라이언트 요청은 Nginx를 거쳐 Spring Boot 애플리케이션으로 전달됩니다. 애플리케이션은 JPA Repository를 통해 PostgreSQL에 리뷰 상태와 결과를 저장하고, 공통 AI Client 인터페이스로 Ollama 또는 OpenAI를 선택해 리뷰를 실행합니다. PR 리뷰에서는 GitHub Client가 GitHub REST API를 통해 변경 diff를 조회하고 인라인 리뷰와 요약 댓글을 게시합니다.
+
 ## 리뷰 처리 흐름
 
 ```mermaid
@@ -65,7 +71,7 @@ Quick·PR 요청 API는 리뷰 ID를 먼저 반환합니다. 클라이언트는 
 - **실행 이력과 입력 분리:** `ReviewEntity`가 실행 상태를 관리하고, `QuickSourceEntity`·`PrSourceEntity`가 입력 정보를 관리합니다.
 - **AI 구현 교체:** `AiReviewClient` 인터페이스와 공통 응답 DTO를 사용해 상위 리뷰 흐름을 유지하면서 Provider를 선택합니다.
 
-구현 과정의 트랜잭션·LAZY 로딩 문제와 로컬 LLM 비교 내용은 [PORTFOLIO.md](./PORTFOLIO.md)에 정리했습니다.
+구현 과정에서 판단이 바뀐 이유, 검토한 대안, 트랜잭션·LAZY 로딩 문제와 로컬 LLM 비교 내용은 [TECHNICAL_DECISIONS.md](./TECHNICAL_DECISIONS.md)에 정리했습니다.
 
 ## 프로젝트 구조
 
@@ -249,4 +255,4 @@ Webhook을 설치한 저장소의 owner/repository와 일치하는 프로젝트,
 - 일반 리뷰와 팀 규칙 검사는 순차적인 두 번의 AI 호출로 구성되어 응답시간과 토큰 사용량에 모두 영향을 줍니다.
 - AI 리뷰에는 오탐·미탐이 있을 수 있습니다. 수정 여부는 근거 코드와 팀 기준을 확인한 뒤 판단합니다.
 
-개발 배경, 문제 해결 과정, 모델 비교 실험의 조건과 한계는 [포트폴리오 문서](./PORTFOLIO.md)에서 확인할 수 있습니다.
+개발 배경, 문제 해결 과정, 모델 비교 실험의 조건과 한계는 [기술 의사결정 기록](./TECHNICAL_DECISIONS.md)에서 확인할 수 있습니다.
