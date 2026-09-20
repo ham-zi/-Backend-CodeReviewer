@@ -1,5 +1,7 @@
 package com.reviewer.github.webhook.model.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ public class GithubWebhookDeliveryService {
 
         return new GithubWebhookReviewWork(
                 delivery.getWebhookDeliveryId(),
+                delivery.getProject().getProjectId(),
                 delivery.getReview().getReviewId(),
                 delivery.getProject().getGitRepoOwner(),
                 delivery.getProject().getGitRepoName(),
@@ -40,6 +43,33 @@ public class GithubWebhookDeliveryService {
     @Transactional
     public void fail(Long webhookDeliveryId, String errorMessage) {
         getDelivery(webhookDeliveryId).fail(errorMessage);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<String> findSummaryCommentUrl(
+            Long projectId,
+            Integer pullNumber
+    ) {
+        return deliveryRepository
+                .findFirstByProject_ProjectIdAndPullNumberAndCommentUrlIsNotNullOrderByUpdatedAtDesc(
+                        projectId,
+                        pullNumber
+                )
+                .map(GithubWebhookDeliveryEntity::getCommentUrl);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isLatestDelivery(
+            Long webhookDeliveryId,
+            Long projectId,
+            Integer pullNumber
+    ) {
+        return !deliveryRepository
+                .existsByProject_ProjectIdAndPullNumberAndWebhookDeliveryIdGreaterThan(
+                        projectId,
+                        pullNumber,
+                        webhookDeliveryId
+                );
     }
 
     private GithubWebhookDeliveryEntity getDelivery(Long webhookDeliveryId) {

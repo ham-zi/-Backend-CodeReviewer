@@ -17,4 +17,16 @@ public interface GithubWebhookDeliveryRepository
                     Integer pullNumber,
                     String headSha
             );
+
+    Optional<GithubWebhookDeliveryEntity>
+            findFirstByProject_ProjectIdAndPullNumberAndCommentUrlIsNotNullOrderByUpdatedAtDesc(
+                    Long projectId,
+                    Integer pullNumber
+            );
+
+    boolean existsByProject_ProjectIdAndPullNumberAndWebhookDeliveryIdGreaterThan(
+            Long projectId,
+            Integer pullNumber,
+            Long webhookDeliveryId
+    );
 }
