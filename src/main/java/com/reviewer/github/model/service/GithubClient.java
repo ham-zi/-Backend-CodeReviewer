@@ -171,6 +171,38 @@ public class GithubClient {
     }
 
     /**
+     * 기존 PR 요약 코멘트의 본문을 수정한다.
+     * Pull Request의 Conversation 코멘트는 Issues API의 comment 리소스다.
+     */
+    public String updatePullRequestComment(
+            String owner,
+            String repository,
+            Long commentId,
+            String body
+    ) {
+        JsonNode response = restClient.patch()
+                .uri(
+                        "/repos/{owner}/{repo}/issues/comments/{commentId}",
+                        owner,
+                        repository,
+                        commentId
+                )
+                .body(new GithubCommentRequest(body))
+                .retrieve()
+                .body(JsonNode.class);
+
+        JsonNode htmlUrl = response == null ? null : response.get("html_url");
+
+        if (htmlUrl == null || !htmlUrl.isString()) {
+            throw new IllegalStateException(
+                    "GitHub PR 코멘트 수정 응답에 html_url이 없습니다."
+            );
+        }
+
+        return htmlUrl.asText();
+    }
+
+    /**
      * PR diff의 변경 후 라인에 인라인 리뷰 코멘트를 한 번의 review로 등록한다.
      */
     public String createPullRequestReview(

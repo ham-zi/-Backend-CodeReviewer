@@ -13,6 +13,7 @@ import com.reviewer.github.webhook.model.dto.GithubReviewCommentData;
 import com.reviewer.github.webhook.model.dto.GithubFormattedReview;
 import com.reviewer.github.webhook.model.dto.GithubWebhookReviewWork;
 import com.reviewer.github.webhook.model.service.GithubReviewCommentFormatter;
+import com.reviewer.github.webhook.model.service.GithubPullRequestSummaryService;
 import com.reviewer.github.webhook.model.service.GithubWebhookDeliveryService;
 import com.reviewer.review.model.dto.PrReviewProcessData;
 import com.reviewer.review.model.dto.ReviewProcessData;
@@ -29,6 +30,7 @@ public class ReviewAsyncService {
     private final TeamReviewProcessor teamReviewProcessor;
     private final GithubClient githubClient;
     private final GithubWebhookDeliveryService webhookDeliveryService;
+    private final GithubPullRequestSummaryService pullRequestSummaryService;
     private final GithubReviewCommentFormatter commentFormatter;
     private final GithubWebhookProperties webhookProperties;
 
@@ -109,10 +111,8 @@ public class ReviewAsyncService {
                     formattedReview.inlineComments()
             );
 
-            String commentUrl = githubClient.createPullRequestComment(
-                    work.repositoryOwner(),
-                    work.repositoryName(),
-                    work.pullNumber(),
+            String commentUrl = pullRequestSummaryService.publish(
+                    work,
                     formattedReview.summary()
             );
 

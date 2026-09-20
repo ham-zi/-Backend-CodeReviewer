@@ -4,6 +4,7 @@ import com.reviewer.enums.ReviewStatusRole;
 
 public record GithubWebhookReviewWork(
         Long webhookDeliveryId,
+        Long projectId,
         Long reviewId,
         String repositoryOwner,
         String repositoryName,
