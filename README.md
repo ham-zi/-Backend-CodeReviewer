@@ -235,7 +235,7 @@ flowchart LR
 
 ### 실행 환경
 
-JDK 21, PostgreSQL, AI Provider 설정과 GitHub 연동 정보를 준비해야 합니다. 현재 저장소에는 `application.yml`과 참조 대상인 `SystemPromptEntity.java`가 누락되어 있어, 소스 복원과 설정·초기 데이터 준비 후 빌드 및 실행해야 합니다.
+JDK 21, PostgreSQL, AI Provider 설정과 GitHub 연동 정보를 준비해야 합니다. 실행에 필요한 설정과 초기 데이터는 아래 안내를 참고합니다.
 
 <details>
 <summary>로컬 실행 준비 및 설정 보기</summary>
@@ -251,7 +251,7 @@ cd reviewmate-backend
 
 JDK 21, PostgreSQL, 사용할 AI Provider의 실행 환경 또는 API 키를 준비합니다. Gradle은 저장소에 포함된 Wrapper를 사용합니다.
 
-> 현재 공개 저장소에는 `application.yml`과 `src/main/java/com/reviewer/system/model/Entity/SystemPromptEntity.java`가 포함되어 있지 않습니다. 해당 엔티티는 다른 클래스에서 참조하므로 빌드 전에 복원이 필요합니다. 설정·응답 스키마·초기 데이터도 준비해야 하며, 저장소를 내려받는 것만으로 바로 실행되는 상태는 아닙니다.
+> `application.yml`은 저장소에 포함되어 있지 않습니다. 실행 환경에 맞는 설정·응답 스키마·초기 데이터를 준비합니다.
 
 #### 2. 애플리케이션 설정
 
@@ -299,7 +299,7 @@ GITHUB_MAX_DIFF_CHARACTERS=120000
 
 #### 4. 실행
 
-위 소스·설정·DB 준비를 완료한 뒤 실행합니다.
+위 설정·DB 준비를 완료한 뒤 실행합니다.
 
 ```bash
 # macOS / Linux
@@ -379,7 +379,7 @@ Webhook을 설치한 저장소의 owner/repository와 일치하는 프로젝트,
 | Webhook 이력 | `GithubWebhookDeliveryEntity` | Delivery·head SHA·처리 상태·댓글 URL 관리 |
 | 프롬프트 설정 | `SystemSettingEntity` | 리뷰 유형별 활성 프롬프트 참조 |
 
-프롬프트 관련 코드는 `SystemPromptEntity`를 참조하지만 해당 소스는 현재 공개 저장소에 포함되어 있지 않습니다. 과거 Branch 리뷰 관련 엔티티도 남아 있으나, 현재 리뷰 요청 API는 Quick·PR 두 유형을 제공합니다.
+과거 Branch 리뷰 관련 엔티티도 남아 있으나, 현재 리뷰 요청 API는 Quick·PR 두 유형을 제공합니다.
 
 ---
 
@@ -405,7 +405,7 @@ GitHub 연동의 서명 검증, diff 라인 해석, 댓글 생성과 요약 갱�
 .\gradlew.bat test
 ```
 
-테스트 실행에는 누락된 엔티티 복원이 필요하며, 컨텍스트 테스트에는 애플리케이션 설정과 DB 환경도 필요합니다. 위 표는 저장소의 테스트 코드 기준이며 테스트 통과 결과를 의미하지 않습니다.
+컨텍스트 테스트에는 애플리케이션 설정과 DB 환경이 필요합니다. 위 표는 저장소의 테스트 코드 기준이며 테스트 통과 결과를 의미하지 않습니다.
 
 ### 로컬 LLM 비교
 
@@ -447,7 +447,7 @@ GitHub 연동의 서명 검증, diff 라인 해석, 댓글 생성과 요약 갱�
 
 ### 향후 과제
 
-- 누락된 엔티티와 실행 설정 예시를 보완해 저장소만으로 빌드·실행 가능한 환경 구성
+- 실행 설정 예시와 초기 데이터 준비 절차 보완
 - 파일·hunk 단위 분할과 관련 코드 수집으로 diff 밖의 문맥 보강
 - 동일 지적의 반복 인라인 댓글을 줄이기 위한 fingerprint와 해결 상태 추적
 - 재시작 후 비동기 작업 복구와 여러 서버 인스턴스 간 PR별 게시 순서 보장
